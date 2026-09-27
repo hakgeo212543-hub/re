@@ -3,16 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <title>test</title>
-    <link rel="stylesheet" href="style.html">
+    <style>
+        .bear {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            width: 260px;
+            height: 500px;
+            transform: translateY(-50%) scaleX(-1);
+        }       
+    </style>
 </head>
 <body>
 
-    <h1>이미지 테스트?</h1>
-
+    
+    <p id="key">key:</p>
+    <p id="key_list">list:</p>
     <img
         class="bear"
         src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear.png"
     >
-
+    <script>
+        let p = document.getElementById("key");
+        let keys = document.getElementById("key_list");
+        let key_list = [];
+        document.addEventListener("keydown",function(event){
+            p.innerHTML = `key:${event.key}`;
+            key_list.push(event.key);
+            if(event.key == " "){
+                key_list = [];
+            }
+            keys.innerHTML = "list:"+key_list;
+            
+        });
+    </script>
 </body>
 </html>
