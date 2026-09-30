@@ -1,10 +1,49 @@
 <style>
-    .bear {
-        position: fixed;
-        right: 0;
-        top: 50%;
-        width: 260px;
-        height: 500px;
-        transform: translateY(-50%) scaleX(-1);
-    }       
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;   /* 남는 여백 색 */
+            overflow: hidden;
+        }   
+        .stage {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            width: min(100vw, 100vh * 16 / 9);   /* 창 안에 꽉 차되 비율 유지 */
+            container-type: size;                /* 안쪽에서 cqw/cqh 사용 가능 */
+            
+        }
+        .bear {
+            position: absolute;
+            right: 5.2cqw;
+            top: 50%;
+            width: 13.54cqw;
+            height: auto;
+            transform: translateY(-50%) scaleX(-1);
+        }  
+        .minam{
+            position: absolute;      /* 스크롤해도 왼쪽에 고정 */
+            left: 5.2cqw;
+            top: 15.5cqw;               /* 세로 위치는 필요에 따라 조절 */
+            width: auto;   /* 화면 너비의 1/6 */
+            height: 50cqh;             /* 화면 높이의 1/2 */
+            object-fit: cover;
+        }   
+        .text{
+            position:absolute;
+            left: 0;
+            top: 0;
+            color: aqua;
+        }  
+        .pop {
+            animation: pop 0.1s ease-out;
+        }
+
+        @keyframes pop {
+            0%   { scale: 1; }
+            30%  { scale: 0.9; }    /* 순간 약간 작아짐 */
+            100% { scale: 1; }      /* 원래 크기로 복귀 */
+        }       
 </style>
