@@ -7,25 +7,63 @@
 </head>
 <body>
 
+    <div class="text">
+        <p id="key">key:</p>
+
+        <p id="key_list">list:</p>
+    </div>
     
-    <p id="key">key:</p>
-    <p id="key_list">list:</p>
+
     <img
         class="bear"
         src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear.png"
     >
+    <img
+        class="minam" 
+        id="minam"
+        src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/a.png"
+    >
     <script>
+        
         let p = document.getElementById("key");
         let keys = document.getElementById("key_list");
+        let minam = document.getElementById("minam");
+        
+        minam.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/s.png`;
+        minam.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/k.png`;
+        minam.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/l.png`;
+        minam.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/space.png`;
+        minam.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/a.png`;
+        
         let key_list = [];
+
+        var pose = "";
         document.addEventListener("keydown",function(event){
             p.innerHTML = `key:${event.key}`;
             key_list.push(event.key);
+
             if(event.key == " "){
                 key_list = [];
             }
             keys.innerHTML = "list:"+key_list;
-            
+            // 자세
+            pose = event.key;
+            if(pose == "a" || pose == "s" || pose == "k" || pose == "l" || pose == " "){
+                popImage('minam');
+                if(pose == " "){
+                    pose = "space";
+                }
+                minam.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/${pose}.png`;
+            }
+
+            function popImage(target) {
+                const el = typeof target === 'string' ? document.getElementById(target) : target;
+                if (!el) return;
+
+                el.classList.remove('pop');
+                void el.offsetWidth;          // 리플로우 강제: 애니메이션을 처음부터 다시 재생
+                el.classList.add('pop');
+            }
         });
     </script>
 </body>
