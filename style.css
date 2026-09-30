@@ -1,4 +1,4 @@
-<style>
+
         body {
             margin: 0;
             height: 100vh;
@@ -46,4 +46,4 @@
             30%  { scale: 0.9; }    /* 순간 약간 작아짐 */
             100% { scale: 1; }      /* 원래 크기로 복귀 */
         }       
-</style>
+
