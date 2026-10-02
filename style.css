@@ -14,14 +14,31 @@ body {
         container-type: size;                /* 안쪽에서 cqw/cqh 사용 가능 */
             
 }
+.target{
+    position: absolute;
+    right: 5.2cqw;
+    top: 50%;
+
+    width: 0;
+    height: 0;
+    
+}
 .bear {
         position: absolute;
-        right: 5.2cqw;
-        top: 50%;
+        right: 0cqw;
+        top: 0cqw;
+
         width: 13.54cqw;
         height: auto;
         transform: translateY(-50%) scaleX(-1);
 }  
+.fire{
+    position: absolute;
+    width: 10cqw;
+    height: 12cqw;
+    transform: scaleX(-1.5) scaleY(1.5);
+    right: 100cqw;
+}
 .minam{
         position: absolute;      /* 스크롤해도 왼쪽에 고정 */
         left: 5.2cqw;
@@ -30,6 +47,7 @@ body {
         height: 50cqh;             /* 화면 높이의 1/2 */
         object-fit: cover;
 }   
+
 .text{
         position:absolute;
         left: 0;
@@ -44,5 +62,40 @@ body {
         0%   { scale: 1; }
         30%  { scale: 0.9; }    /* 순간 약간 작아짐 */
         100% { scale: 1; }      /* 원래 크기로 복귀 */
-}       
+}  
+.keys {
+    position: absolute;
+    left: 5vw;
+    bottom: 5vw;
 
+    display: flex;
+    gap: 3vw;
+}     
+.key {
+    
+    width: 10vw;
+    height: 10vh;
+
+    
+
+    border: 0.4vw solid #333;
+    border-radius: 1vw;
+
+    
+    background-color: rgba(200, 200, 200, 0.1);
+
+    color:aliceblue;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 24px;
+    font-weight: bold;
+    
+    
+}
+
+.space {
+    width: 34vw;
+}
