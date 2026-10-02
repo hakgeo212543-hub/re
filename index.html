@@ -14,16 +14,24 @@
         <p id="key_list">list:</p>
     </div>
     
+    <div class="target">
+        <img class="bear" src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear.png">
+        <img id="fire" class="fire" src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire1.png">
+    </div>
 
-    <img
-        class="bear"
-        src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear.png"
-    >
     <img
         class="minam" 
         id="minam"
         src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/a.png"
     >
+
+    </div>
+    <div class="keys">
+        <div id="a" class="key">A</div>
+        <div id="s" class="key">S</div>
+        <div id="space" class="key space">SPACE</div>
+        <div id="k" class="key">K</div>
+        <div id="l" class="key">L</div>
     </div>
     <script>
         const BASE = "https://raw.githubusercontent.com/hakgeo212543-hub/re/img/";
@@ -39,7 +47,10 @@
         const keys = document.getElementById("key_list");
         const minam = document.getElementById("minam");
         let key_list = [];
-
+        let key_save = [];
+        
+        let fireRight = 100;
+        
         // 미리 불러오기: 새 Image 객체로 캐시에 저장
         Object.values(poseMap).forEach(name => {
             const img = new Image();
@@ -59,18 +70,35 @@
             if (event.code === "Space") event.preventDefault();
 
             p.textContent = `key:${event.key}`;
-
+            
             if (event.code === "Space") {
+                popImage(space);
+                key_save = key_list;
                 key_list = [];
-            } else {
-                key_list.push(event.key);
-            }
-            keys.textContent = "list:" + key_list;
-
+                keys.textContent = "list:" + key_list;
+                
+            } 
             const pose = poseMap[event.code];          // 한글/대문자 상태에서도 동작
             if (pose) {
+                popImage(pose);
+                if(event.code != "Space"){
+                    key_list.push(event.key);
+                }
+                keys.textContent = "list:" + key_list;
                 popImage(minam);
                 minam.src = `${BASE}${pose}.png`;
+            }
+            
+
+
+            // attact
+            if (JSON.stringify(key_save) === JSON.stringify(["a", "s", "k", "l"])){
+                let fire = document.getElementById("fire");
+                
+
+                if(parseFloat(fire.style.right) > 14){
+                    fire.style.right = (parseFloat(fire.style.right) - 10) + "cqw";
+                }
             }
         });
     </script>
