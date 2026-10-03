@@ -130,11 +130,11 @@
 
     </div>
     <div class="keys">
-        <div id="a" class="key" onchange="tab_down('a')">A</div>
-        <div id="s" class="key" onchange="tab_down('s')">S</div>
-        <div id="space" class="key space" onchange="tab_down('space')">SPACE</div>
-        <div id="k" class="key" onchange="tab_down('k')">K</div>
-        <div id="l" class="key" onchange="tab_down('l')">L</div>
+        <div id="a" class="key" onclick="tab_down('a')">A</div>
+        <div id="s" class="key" onclick="tab_down('s')">S</div>
+        <div id="space" class="key space" onclick="tab_down('space')">SPACE</div>
+        <div id="k" class="key" onclick="tab_down('k')">K</div>
+        <div id="l" class="key" onclick="tab_down('l')">L</div>
     </div>
     <script>
         const BASE = "https://raw.githubusercontent.com/hakgeo212543-hub/re/img/";
@@ -183,7 +183,7 @@
         function tab_down(tab_key){
             if(is_gameover == false){
                 p.textContent = `key:${tab_key}`;
-                if (tab_key === "Space") {
+                if (tab_key === "space") {
                     popImage(space);
                     key_save = key_list;
                     key_list = [];
