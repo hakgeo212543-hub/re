@@ -43,7 +43,7 @@
     width: 10cqw;
     height: 12cqw;
     transform: scaleX(-1.5) scaleY(1.5);
-    right: 100cqw;
+    right: 150cqw;
 }
 .minam{
         position: absolute;      /* 스크롤해도 왼쪽에 고정 */
@@ -256,7 +256,7 @@
             let test = document.getElementById("test");
             test.innerHTML = "right:"+getComputedStyle(fire).right;   
             key_save = [];
-            let fire_x = 100;
+            let fire_x = 150;
             const timer = setInterval(() => {
                 fire_x = fire_x - 7;
                 fire.style.right = fire_x+"cqw";                   // 1cqw씩 이동
@@ -294,7 +294,7 @@
                 fire.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire${frame}.png`;
                 fire_x = fire_x + 7;
                 fire.style.right = fire_x+"cqw";                   // 1cqw씩 이동
-                if (fire_x > 100){
+                if (fire_x > 150){
                     clearInterval(timer);
                     
                 }
