@@ -12,6 +12,7 @@
         <p id="key">key:</p>
 
         <p id="key_list">list:</p>
+        <p id="test">right:</p>
     </div>
     
     <div class="target">
@@ -46,10 +47,11 @@
         const p = document.getElementById("key");
         const keys = document.getElementById("key_list");
         const minam = document.getElementById("minam");
+        let fire = document.getElementById("fire");
         let key_list = [];
         let key_save = [];
         
-        let fireRight = 100;
+        
         
         // 미리 불러오기: 새 Image 객체로 캐시에 저장
         Object.values(poseMap).forEach(name => {
@@ -89,18 +91,42 @@
                 minam.src = `${BASE}${pose}.png`;
             }
             
-
-
-            // attact
             if (JSON.stringify(key_save) === JSON.stringify(["a", "s", "k", "l"])){
-                let fire = document.getElementById("fire");
-                
-
-                if(parseFloat(fire.style.right) > 14){
-                    fire.style.right = (parseFloat(fire.style.right) - 10) + "cqw";
-                }
+                fire_trigger();           
             }
+            
+            
         });
+        // attact
+        // fire-----------------------------------------------------------------------------
+        function fire_trigger(){
+            let test = document.getElementById("test");
+            test.innerHTML = "right:"+getComputedStyle(fire).right;   
+            key_save = [];
+            let fire_x = 100;
+            const timer = setInterval(() => {
+                fire_x = fire_x - 7;
+                fire.style.right = fire_x+"cqw";                   // 1cqw씩 이동
+                if (fire_x < 20){
+                    clearInterval(timer);
+                    fire_img();
+                }
+            }, 16);
+            
+        }
+        function fire_img(){
+            let frame = 1;
+            const timer = setInterval(() => {
+                frame = frame+1;
+                fire.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire${frame}.png`;
+                
+                if(frame = 5){              
+                    fire.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire1.png`;
+                }
+                esle
+            }, 120);
+        }
+        // ----------------------------------------------------------------------------------
     </script>
 </body>
 </html>
