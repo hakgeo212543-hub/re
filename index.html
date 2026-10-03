@@ -183,11 +183,11 @@
         function tab_down(tab_key){
             if(is_gameover == false){
                 p.textContent = `key:${tab_key}`;
-                if (tab_key === "space") {
+                if (tab_key == "space") {
                     popImage(space);
                     key_save = key_list;
                     key_list = [];
-                    eys.textContent = "list:" + key_list;
+                    keys.textContent = "list:" + key_list;
                 }
                  
                 const pose = tab_key;          // 한글/대문자 상태에서도 동작
