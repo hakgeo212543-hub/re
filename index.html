@@ -163,11 +163,15 @@
         Object.values(poseMap).forEach(name => {
             const img = new Image();
             img.src = `${BASE}${name}.png`;
+            img.decode().catch(() => {});   // 미리 디코딩
+            preloaded.push(img);
         });
 
         for (let i = 1; i <= 4; i++) {
             const img = new Image();
             img.src = `${BASE}fire${i}.png`;
+            img.decode().catch(() => {});   // 미리 디코딩
+            preloaded.push(img);
         }
 
         
