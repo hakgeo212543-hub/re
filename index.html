@@ -3,7 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <title>test</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000;   /* 남는 여백 색 */
+        overflow: hidden;
+}   
+.stage {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        width: min(100vw, 100vh * 16 / 9);   /* 창 안에 꽉 차되 비율 유지 */
+        container-type: size;                /* 안쪽에서 cqw/cqh 사용 가능 */
+            
+}
+.target{
+    position: absolute;
+    right: 5.2cqw;
+    top: 50%;
+
+    width: 0;
+    height: 0;
+    
+}
+.bear {
+        position: absolute;
+        right: 0cqw;
+        top: 0cqw;
+
+        width: 13.54cqw;
+        height: auto;
+        transform: translateY(-50%) scaleX(-1);
+}  
+.fire{
+    position: absolute;
+    width: 10cqw;
+    height: 12cqw;
+    transform: scaleX(-1.5) scaleY(1.5);
+    right: 100cqw;
+}
+.minam{
+        position: absolute;      /* 스크롤해도 왼쪽에 고정 */
+        left: 5.2cqw;
+        top: 15.5cqw;               /* 세로 위치는 필요에 따라 조절 */
+        width: auto;   /* 화면 너비의 1/6 */
+        height: 50cqh;             /* 화면 높이의 1/2 */
+        object-fit: cover;
+}   
+
+.text{
+        position:absolute;
+        left: 0;
+        top: 0;
+        color: aqua;
+}  
+.pop {
+        animation: pop 0.1s ease-out;
+}
+
+@keyframes pop {
+        0%   { scale: 1; }
+        30%  { scale: 0.9; }    /* 순간 약간 작아짐 */
+        100% { scale: 1; }      /* 원래 크기로 복귀 */
+}  
+.keys {
+    position: absolute;
+    left: 5vw;
+    bottom: 5vw;
+
+    display: flex;
+    gap: 3vw;
+}     
+.key {
+    
+    width: 10vw;
+    height: 10vh;
+
+    
+
+    border: 0.4vw solid #333;
+    border-radius: 1vw;
+
+    
+    background-color: rgba(200, 200, 200, 0.1);
+
+    color:aliceblue;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 24px;
+    font-weight: bold;
+    
+    
+}
+
+.space {
+    width: 34vw;
+}
+    </style>
     
 </head>
 <body>
@@ -15,7 +117,7 @@
         <p id="test">right:</p>
     </div>
     
-    <div class="target">
+    <div id="target" class="target">
         <img class="bear" src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear.png">
         <img id="fire" class="fire" src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire1.png">
     </div>
@@ -28,11 +130,11 @@
 
     </div>
     <div class="keys">
-        <div id="a" class="key">A</div>
-        <div id="s" class="key">S</div>
-        <div id="space" class="key space">SPACE</div>
-        <div id="k" class="key">K</div>
-        <div id="l" class="key">L</div>
+        <div id="a" class="key" onchange="tab_down('a')">A</div>
+        <div id="s" class="key" onchange="tab_down('s')">S</div>
+        <div id="space" class="key space" onchange="tab_down('space')">SPACE</div>
+        <div id="k" class="key" onchange="tab_down('k')">K</div>
+        <div id="l" class="key" onchange="tab_down('l')">L</div>
     </div>
     <script>
         const BASE = "https://raw.githubusercontent.com/hakgeo212543-hub/re/img/";
@@ -43,6 +145,9 @@
             KeyL: "l",
             Space: "space"
         };
+        
+
+        let is_gameover = false;
 
         const p = document.getElementById("key");
         const keys = document.getElementById("key_list");
@@ -52,12 +157,20 @@
         let key_save = [];
         
         
-        
+        //cooldown
+        let fire_cool = false;
         // 미리 불러오기: 새 Image 객체로 캐시에 저장
         Object.values(poseMap).forEach(name => {
             const img = new Image();
             img.src = `${BASE}${name}.png`;
         });
+
+        for (let i = 1; i <= 4; i++) {
+            const img = new Image();
+            img.src = `${BASE}fire${i}.png`;
+        }
+
+        
 
         function popImage(target) {
             const el = typeof target === "string" ? document.getElementById(target) : target;
@@ -66,8 +179,42 @@
             void el.offsetWidth;
             el.classList.add("pop");
         }
-
+        //touch--------------------------------------------------------------
+        function tab_down(tab_key){
+            if(is_gameover == false){
+                p.textContent = `key:${tab_key}`;
+                if (tab_key === "Space") {
+                    popImage(space);
+                    key_save = key_list;
+                    key_list = [];
+                    eys.textContent = "list:" + key_list;
+                }
+                 
+                const pose = tab_key;          // 한글/대문자 상태에서도 동작
+                if (pose) {
+                    popImage(pose);
+                    if(tab_key != "space"){
+                        key_list.push(tab_key);
+                    }
+                        keys.textContent = "list:" + key_list;
+                    popImage(minam);
+                    minam.src = `${BASE}${pose}.png`;
+                }
+            
+                if (JSON.stringify(key_save) === JSON.stringify(["a", "s", "k", "l"])){
+                    if(fire_cool == false){
+                        fire_trigger(); 
+                    }
+                    else{
+                        key_save = [];
+                    }          
+                }
+            }
+        }
+        //---------------------------------------------------------------
+        //keyboard--------------------------------------------------------
         document.addEventListener("keydown", function (event) {
+          if(is_gameover == false){
             if (event.repeat) return;                  // 꾹 누름 방지
             if (event.code === "Space") event.preventDefault();
 
@@ -92,14 +239,20 @@
             }
             
             if (JSON.stringify(key_save) === JSON.stringify(["a", "s", "k", "l"])){
-                fire_trigger();           
+                if(fire_cool == false){
+                    fire_trigger(); 
+                }
+                else{
+                    key_save = [];
+                }          
             }
             
-            
+          } 
         });
         // attact
         // fire-----------------------------------------------------------------------------
         function fire_trigger(){
+            fire_cool = true;
             let test = document.getElementById("test");
             test.innerHTML = "right:"+getComputedStyle(fire).right;   
             key_save = [];
@@ -109,24 +262,69 @@
                 fire.style.right = fire_x+"cqw";                   // 1cqw씩 이동
                 if (fire_x < 20){
                     clearInterval(timer);
-                    fire_img();
+                    fire_img(fire_x);
                 }
             }, 16);
             
         }
-        function fire_img(){
+        function fire_img(fire_x){
             let frame = 1;
+            
             const timer = setInterval(() => {
                 frame = frame+1;
                 fire.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire${frame}.png`;
                 
-                if(frame = 5){              
+                if(frame == 3 || frame == 4){
+                    kb();
+                }
+                if(frame == 8){
+                    fire_back(fire_x);
+                    fire_cool = false;
+                    clearInterval(timer);
+                }
+                else if(frame >= 5){              
                     fire.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire1.png`;
                 }
-                esle
-            }, 120);
+                
+            }, 80);
+        }
+        function fire_back(fire_x){
+            const timer = setInterval(() => {
+                frame = 1;
+                fire.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire${frame}.png`;
+                fire_x = fire_x + 7;
+                fire.style.right = fire_x+"cqw";                   // 1cqw씩 이동
+                if (fire_x > 100){
+                    clearInterval(timer);
+                    
+                }
+            }, 16);
+            
+            
         }
         // ----------------------------------------------------------------------------------
+        //ceo-------------------------------------------------------------------------------
+        let bear_x = 5.2;
+        let bear = document.getElementById("target");
+        function kb(){
+            bear_x = bear_x - 2;
+            target.style.right = bear_x+"cqw";
+        }
+        const bear_timer = setInterval(() => {
+            bear_x = bear_x + 0.1;
+            target.style.right = bear_x+"cqw";
+            
+            if(bear_x > 70){
+                gameover();
+                clearInterval(bear_timer);
+            }
+        },16);
+        //-------------------------------------------------------------------------------
+        
+        //gameover-----------------------------------------------------------------------
+        function gameover(){
+            is_gameover = true;
+        }
     </script>
 </body>
 </html>
