@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>test</title>
+    <title>game</title>
     <style>
         body {
         margin: 0;
@@ -30,16 +30,18 @@
 
     width: 0;
     height: 0;
-    
+    z-index: 2;
 }
 .bear {
         position: absolute;
         right: 0cqw;
         top: 0cqw;
 
-        width: 13.54cqw;
-        height: auto;
+        width: auto;
+        height: 35cqw;
         transform: translateY(-50%) scaleX(-1);
+
+        filter: drop-shadow(-0.5cqw 0.8cqw 0.6cqw rgba(231, 231, 231, 0.5));
 }  
 .fire{
     position: absolute;
@@ -47,6 +49,8 @@
     height: 12cqw;
     transform: scaleX(-1.5) scaleY(1.5);
     right: 150cqw;
+
+    filter: drop-shadow(0cqw 0cqw 1cqw rgba(255, 60, 0, 0.678));
 }
 .minam{
     -webkit-user-drag: none;      /* 크롬/사파리 드래그 방지 */
@@ -58,14 +62,53 @@
         width: auto;   /* 화면 너비의 1/6 */
         height: 50cqh;             /* 화면 높이의 1/2 */
         object-fit: cover;
-}   
+        
+        filter: drop-shadow(-0.5cqw 0.8cqw 0.6cqw rgba(231, 231, 231, 0.5));
 
+        z-index: 1;
+}   
+.may{
+    -webkit-user-drag: none;      /* 크롬/사파리 드래그 방지 */
+    user-select: none;
+    -webkit-touch-callout: none; 
+
+    position: absolute;
+
+    width: 10cqw;
+    height: auto;
+
+    bottom: 22cqh;
+    left: -100cqw;
+
+    filter: drop-shadow(0cqw 0cqw 1cqw rgba(249, 253, 0, 0.5));
+
+    transform: scaleX(-1);
+
+    z-index: 10;
+}
+.word {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    color: white;
+    font-weight: bold;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    z-index: 15;
+}
 .text{
         position:absolute;
         left: 0;
         top: 0;
         color: aqua;
 }  
+.member_key{
+    position:absolute;
+    top: 0;
+    right: 0;
+    color: aqua;
+}
 .pop {
         animation: pop 0.1s ease-out;
 }
@@ -117,14 +160,14 @@
 <body>
     <div class="stage">
     <div class="text">
-        <p id="key">key:</p>
-
-        <p id="key_list">list:</p>
-        <p id="test">right:</p>
+        <p id="key_list">list:</p>             
     </div>
+    <div class="member_key">
+        <p id="woni">woni:a-s-k-l</p>
+    </div>  
     
     <div id="target" class="target">
-        <img class="bear" src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear.png">
+        <img id="bear" class="bear" src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear_walk0.png">
         <img id="fire" class="fire" src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire1.png">
     </div>
 
@@ -132,6 +175,12 @@
         class="minam" 
         id="minam"
         src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/a.png"
+    >
+
+    <img
+        class="may" 
+        id="may"
+        src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/may1.png"
     >
 
     </div>
@@ -142,6 +191,8 @@
         <div id="k" class="key" onclick="tab_down('k')">K</div>
         <div id="l" class="key" onclick="tab_down('l')">L</div>
     </div>
+
+    <!-- --------------------------------------------------------------------------------------------------------------------------------------------------- -->
     <script>
         const BASE = "https://raw.githubusercontent.com/hakgeo212543-hub/re/img/";
         const poseMap = {
@@ -155,16 +206,21 @@
 
         let is_gameover = false;
 
+        const stage = document.querySelector(".stage");
+
         const p = document.getElementById("key");
         const keys = document.getElementById("key_list");
         const minam = document.getElementById("minam");
-        let fire = document.getElementById("fire");
+        const fire = document.getElementById("fire");
+        const may = document.getElementById("may");
+
         let key_list = [];
         let key_save = [];
         
         
         //cooldown
         let fire_cool = false;
+        let may_cool = false;
 
 
         
@@ -196,7 +252,7 @@
         //touch--------------------------------------------------------------
         function tab_down(tab_key){
             if(is_gameover == false){
-                p.textContent = `key:${tab_key}`;
+                // p.textContent = `key:${tab_key}`;
                 if (tab_key == "space") {
                     popImage(space);
                     key_save = key_list;
@@ -232,7 +288,7 @@
             if (event.repeat) return;                  // 꾹 누름 방지
             if (event.code === "Space") event.preventDefault();
 
-            p.textContent = `key:${event.key}`;
+            // p.textContent = `key:${event.key}`;
             
             if (event.code === "Space") {
                 popImage(space);
@@ -260,15 +316,23 @@
                     key_save = [];
                 }          
             }
-            
+            if (JSON.stringify(key_save) === JSON.stringify(["k", "k", "s", "l", "k"])){
+                if(may_cool == false){
+                    may_trigger(); 
+                }
+                else{
+                    key_save = [];
+                }          
+            }
           } 
         });
         // attact
+        let is_hit = false;
         // fire-----------------------------------------------------------------------------
         function fire_trigger(){
             fire_cool = true;
-            let test = document.getElementById("test");
-            test.innerHTML = "right:"+getComputedStyle(fire).right;   
+            
+            
             key_save = [];
             let fire_x = 150;
             const timer = setInterval(() => {
@@ -293,7 +357,7 @@
                 }
                 if(frame == 8){
                     fire_back(fire_x);
-                    fire_cool = false;
+                    
                     clearInterval(timer);
                 }
                 else if(frame >= 5){              
@@ -310,35 +374,184 @@
                 fire.style.right = fire_x+"cqw";                   // 1cqw씩 이동
                 if (fire_x > 150){
                     clearInterval(timer);
-                    
+                    fire_cool = false;
                 }
             }, 16);
             
             
         }
         // ----------------------------------------------------------------------------------
+        //may-------------------------------------------------------------------------------
+        function may_trigger(){
+            may_cool = true;
+            
+            
+            key_save = [];
+            let may_x = -100;
+            
+            const timer = setInterval(() => {
+                may_x = Math.min(may_x + 7, 10);
+                may.style.left = may_x+"cqw";                
+                if (may_x == 10){
+                    clearInterval(timer);
+                    play_lines(lines);
+                    may_img(may_x);
+                }
+            }, 16);
+            
+        }
+        function may_img(may_x){
+            let frame = 1;
+            let times = 0;
+            const timer = setInterval(() => {
+                frame = (frame+1)%3+1;
+                times = times + 1;
+                may.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/may${frame}.png`;
+                
+                if(frame == 3){
+                    
+                    kb();
+                }
+                if(times == 30){
+                    
+                    may_back(may_x);
+                    stop_lines();
+                    clearInterval(timer);
+                }
+                
+                
+            }, 100);
+        }
+        function may_back(may_x){
+            const timer = setInterval(() => {
+                may_x = may_x - 7;
+                may.style.left = may_x+"cqw";                   
+                if (may_x < -100){
+                    clearInterval(timer);
+                    may_cool = false;
+                }
+            }, 16);
+            
+            
+        }
+        //----------------------------------------------------------------------------------
         //ceo-------------------------------------------------------------------------------
         let bear_x = 5.2;
         let bear = document.getElementById("target");
         function kb(){
+            if(!is_hit){
+                term = 0;
+                const timer = setInterval(() => {
+                    term = term + 1;
+                    bear_img.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear_hit.png`;
+                    if(term == 2){ 
+                        clearInterval(timer);
+                        is_hit = false;
+                    }
+                },30);
+            }
+            
+            is_hit = true;
             bear_x = bear_x - 2;
             target.style.right = bear_x+"cqw";
         }
         const bear_timer = setInterval(() => {
-            bear_x = bear_x + 0.1;
+            bear_x = bear_x + 1.3;
             target.style.right = bear_x+"cqw";
             
             if(bear_x > 70){
                 gameover();
                 clearInterval(bear_timer);
             }
-        },16);
+        },300);
+        let bear_img = document.getElementById("bear");
+        
+        
+        frame = 1;
+        const bear_frame_timer = setInterval(() => {
+            if(is_hit == false){
+                frame = (frame + 1)%4;
+                bear_img.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear_walk${frame}.png`;
+                if(bear_x > 70){
+                    clearInterval(bear_frame_timer);
+                }
+            }
+        },300);
+        
+        
         //-------------------------------------------------------------------------------
         
         //gameover-----------------------------------------------------------------------
         function gameover(){
             is_gameover = true;
         }
+        //------------------------------------------------------------------
+        //may_functions-------------------------------------------------------------
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const rand = (min, max) => min + Math.random() * (max - min);
+        // const colors = ["white", "#ffe14d", "#7df9ff", "#ff9bd2"];
+        
+
+        const lines = [
+            "그거 아시죠? 배가 너무 고파 밥을 너무 빨리... 그렇다고 뭐 안 먹을 순 없잖아요 소고기 뭇국랑 그 스팸이랑"           
+        ];
+
+        let run_id = 0;     
+        let word_timers = [];
+        function throw_word(word){
+            const el = document.createElement("div");
+            el.className = "word";
+            el.textContent = word;
+
+            const may_left = (may.offsetLeft / stage.clientWidth) * 100;
+            el.style.left = (may_left + 10) + "cqw";
+            el.style.bottom = "30cqh";
+            el.style.fontSize = rand(3, 6) + "cqw";
+            el.style.color = "white";
+            
+            stage.appendChild(el);
+
+            const dx   = rand(30, 90);
+            const peak = rand(10, 35);
+            const fall = rand(-10, 40);
+            const rot  = rand(-540, 540);
+            const time = rand(1200, 2200);
+
+            const anim = el.animate([
+                { transform: `translate(0, 0) scale(0.4)`, opacity: 0, easing: "ease-out" },
+                { transform: `translate(${dx * 0.5}cqw, ${-peak}cqh)  scale(1.1)`, opacity: 1, offset: 0.4, easing: "ease-in" },
+                { transform: `translate(${dx}cqw, ${fall}cqh)  scale(1)`, opacity: 1 }
+            ], { duration: time, fill: "forwards" });
+
+            anim.onfinish = () => el.remove();
+            return time;
+        }
+
+        function fly_text(sentence, gap = 300){
+            const words = sentence.split(/\s+/).filter(Boolean);
+            words.forEach((word, i) => {
+                const id = setTimeout(() => throw_word(word), i * gap + rand(0, 150));
+                word_timers.push(id);       
+            });
+            return words.length * gap;
+        }
+
+        async function play_lines(list, gap = 120){
+            const my_id = ++run_id;    
+            for (const sentence of list){
+                if (my_id !== run_id) return;   
+                const t = fly_text(sentence, gap);
+                await sleep(t + 2300);
+            }
+        }
+
+        function stop_lines(){
+            run_id++;                                  // 진행 중인 play_lines 무효화
+            word_timers.forEach(clearTimeout);         // 아직 안 나온 글자 취소
+            word_timers = [];
+            document.querySelectorAll(".word").forEach(el => el.remove());   // 날아가는 글자 제거
+        }
+        
     </script>
 </body>
 </html>
