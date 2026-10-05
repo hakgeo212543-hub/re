@@ -86,6 +86,23 @@
 
     z-index: 10;
 }
+.liv{
+    -webkit-user-drag: none;      /* 크롬/사파리 드래그 방지 */
+    user-select: none;
+    -webkit-touch-callout: none; 
+
+    position: absolute;
+
+    width: 10cqw;
+    height: auto;
+
+    bottom: 50cqh;
+    left: -50cqw;
+
+    filter: drop-shadow(0cqw 0cqw 1cqw rgba(255, 151, 241, 0.5));
+
+    z-index: 11;
+}
 .word {
     position: absolute;
     left: 0;
@@ -163,7 +180,8 @@
         <p id="key_list">list:</p>             
     </div>
     <div class="member_key">
-        <p id="woni">woni:a-s-k-l</p>
+        <p id="woni_key">woni:a-s-k-l</p>
+        <p id="may_key">may:k-k-s-l-k</p>
     </div>  
     
     <div id="target" class="target">
@@ -182,6 +200,8 @@
         id="may"
         src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/may1.png"
     >
+
+    <img class = "liv" id="liv" src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/liv.png">
 
     </div>
     <div class="keys">
@@ -203,7 +223,7 @@
             Space: "space"
         };
         
-
+        let time_level = 1;
         let is_gameover = false;
 
         const stage = document.querySelector(".stage");
@@ -213,6 +233,7 @@
         const minam = document.getElementById("minam");
         const fire = document.getElementById("fire");
         const may = document.getElementById("may");
+        const liv = document.getElementById("liv");
 
         let key_list = [];
         let key_save = [];
@@ -221,6 +242,7 @@
         //cooldown
         let fire_cool = false;
         let may_cool = false;
+        let liv_cool = false;
 
 
         
@@ -287,6 +309,14 @@
                         key_save = [];
                     }          
                 }
+                if (JSON.stringify(key_save) === JSON.stringify(["l", "l", "a", "s", "k"])){
+                    if(liv_cool == false){
+                        liv_trigger(); 
+                    }
+                    else{
+                        key_save = [];
+                    }          
+                }
             }
         }
         //---------------------------------------------------------------
@@ -327,6 +357,14 @@
             if (JSON.stringify(key_save) === JSON.stringify(["k", "k", "s", "l", "k"])){
                 if(may_cool == false){
                     may_trigger(); 
+                }
+                else{
+                    key_save = [];
+                }          
+            }
+            if (JSON.stringify(key_save) === JSON.stringify(["l", "l", "a", "s", "k"])){
+                if(liv_cool == false){
+                    liv_trigger(); 
                 }
                 else{
                     key_save = [];
@@ -388,6 +426,15 @@
             
             
         }
+        setInterval(() => {
+            let woni_key = document.getElementById("woni_key");
+            if(fire_cool == false){
+                woni_key.style.color = "aqua";
+            }
+            else{
+                woni_key.style.color = "gray";
+            }
+        }, 16);
         // ----------------------------------------------------------------------------------
         //may-------------------------------------------------------------------------------
         function may_trigger(){
@@ -442,7 +489,54 @@
             
             
         }
+        setInterval(() => {
+            let may_key = document.getElementById("may_key");
+            if(may_cool == false){
+                may_key.style.color = "aqua";
+            }
+            else{
+                may_key.style.color = "gray";
+            }
+        }, 16);
         //----------------------------------------------------------------------------------
+        //liv----------------------------------------------------------------
+        function liv_trigger(){
+            liv_cool = true;
+            key_save = [];
+            let liv_angle = 0;
+            let liv_x = -30;
+            let liv_y = 50;
+            const timer = setInterval(() => {
+                liv_angle += 100.7;
+                liv.style.rotate = liv_angle+"deg";
+
+                liv_x = Math.min(liv_x+2, 20);
+                liv.style.left =  liv_x + "cqw";
+
+                liv_y = -(8/81)*(liv_x+7.5)**2 + 100;
+                liv.style.bottom = liv_y+"cqh";
+                if(liv_x == 20){
+                    liv_angle = 0;
+                    liv.style.rotate = liv_angle+"deg";
+                    clearInterval(timer);
+                    plasma(liv, { reach: () => reach_to(liv, bear_img) });
+                    liv_back(liv_x);
+                }
+            },16);
+        }
+        function liv_back(liv_x){
+            const timer = setInterval(() =>{
+                liv_x = Math.max(liv_x-0.5, -30);
+                liv.style.left =  liv_x + "cqw";
+                if((liv_x**2)%5 == 0) kb();
+                if(liv_x == -30){
+                    clearInterval(timer);
+                    liv_cool = false;
+                }
+            },16);
+            
+        }
+        //-------------------------------------------------------------------
         //ceo-------------------------------------------------------------------------------
         let bear_x = 5.2;
         let bear = document.getElementById("target");
@@ -464,7 +558,8 @@
             target.style.right = bear_x+"cqw";
         }
         const bear_timer = setInterval(() => {
-            bear_x = bear_x + 1.3;
+            time_level = time_level + 0.01;
+            bear_x = bear_x + (1.3*time_level);
             target.style.right = bear_x+"cqw";
             
             if(bear_x > 70){
@@ -559,7 +654,132 @@
             word_timers = [];
             document.querySelectorAll(".word").forEach(el => el.remove());   // 날아가는 글자 제거
         }
-        
+
+        //liv_functions---------------------------
+        const SVG_NS = "http://www.w3.org/2000/svg";
+
+        function plasma(from, opt = {}){
+            const o = {
+                speed: 4,          // 앞쪽 끝이 나아가는 속도 (cqw/프레임)
+                reach: 90,         // 시작점에서 얼마나 멀리 뻗을지 (cqw)
+                hold: 100,         // 끝까지 뻗은 뒤 유지 시간 (ms)
+                seg: 2.5,          // 꺾임 간격 (cqw), 작을수록 잘게 꺾임
+                jitter: 2.5,       // 위아래로 흔들리는 폭 (cqw)
+                flicker: 40,       // 모양을 새로 뽑는 주기 (ms)
+                color: "#7df9ff",  // 빛 색
+                width: 0.8,        // 선 굵기
+                bolts: 3,          // 겹치는 줄기 수 (첫 번째는 흰색 심지)
+                ...opt
+            };
+
+            // 효과가 그려질 SVG (stage와 같은 16:9 비율, 가로 100 = 100cqw)
+            const svg = document.createElementNS(SVG_NS, "svg");
+            svg.setAttribute("viewBox", "0 0 100 56.25");
+            svg.setAttribute("preserveAspectRatio", "none");
+            svg.style.cssText =
+                "position:absolute;left:0;top:0;width:100%;height:100%;" +
+                "pointer-events:none;overflow:visible;z-index:12;" +
+                `filter:drop-shadow(0 0 1cqw ${o.color});`;
+
+            const lines = [];
+            for (let i = 0; i < o.bolts; i++){
+                const pl = document.createElementNS(SVG_NS, "polyline");
+                pl.setAttribute("fill", "none");
+                pl.setAttribute("stroke", i === 0 ? "#fff" : o.color);
+                pl.setAttribute("stroke-width", i === 0 ? o.width * 0.5 : o.width);
+                pl.setAttribute("stroke-linejoin", "round");
+                pl.setAttribute("stroke-linecap", "round");
+                pl.setAttribute("opacity", i === 0 ? 1 : 0.7);
+                svg.appendChild(pl);
+                lines.push(pl);
+            }
+            stage.appendChild(svg);
+
+            let stopped = false;
+            let resolve_done;
+            const done = new Promise(r => resolve_done = r);
+
+            function finish(){
+                stopped = true;
+                svg.remove();
+                resolve_done();
+            }
+
+            // liv의 현재 위치에서 시작점 계산 (매 프레임 따라감)
+            function start_point(){
+                const s = stage.getBoundingClientRect();
+                const r = from.getBoundingClientRect();
+                return {
+                    x: (r.left + r.width / 2 - s.left) / s.width * 100,
+                    y: (r.top + r.height / 2 - s.top) / s.width * 100   // viewBox 높이 56.25 기준
+                };
+            }
+
+            let length = 0;                 // 현재 뻗은 길이
+            let reached_at = 0;             // 끝까지 뻗은 시각
+            let last_shape = 0;
+            let shapes = [];                // 줄기별 jitter 값 (flicker 주기마다 갱신)
+
+            function new_shapes(count){
+                shapes = lines.map(() =>
+                    Array.from({ length: count }, () => rand(-1, 1)));
+            }
+
+            function frame(now){
+                if (stopped) return;
+                if (is_gameover){ finish(); return; }
+
+                const p = start_point();
+
+                // 매 프레임 reach를 새로 읽음 (숫자도, 함수도 가능)
+                const reach = Math.max(0, typeof o.reach === "function" ? o.reach() : o.reach);
+
+                if (length < reach){
+                    length = Math.min(length + o.speed, reach);   // 모자라면 뻗음
+                    reached_at = 0;                               // 아직 다 안 뻗음
+                } else {
+                    length = reach;                               // 넘치면 즉시 줄임
+                    if (!reached_at) reached_at = now;            // 다 뻗은 시각 기록
+                }
+
+                const count = Math.ceil(length / o.seg) + 1;
+                if (now - last_shape > o.flicker || shapes[0].length < count){
+                    new_shapes(count);
+                    last_shape = now;
+                }
+
+                lines.forEach((pl, b) => {
+                const pts = [];
+                    for (let i = 0; i < count; i++){
+                        const x = p.x + Math.min(i * o.seg, length);
+                        const y = p.y + (i === 0 ? 0 : shapes[b][i] * o.jitter);
+                        pts.push(x.toFixed(2) + "," + y.toFixed(2));
+                    }
+                    pl.setAttribute("points", pts.join(" "));
+                });
+
+                if (reached_at){
+                    const t = now - reached_at;
+                    if (t > o.hold){ finish(); return; }
+                    svg.style.opacity = t > o.hold - 200 ? (o.hold - t) / 200 : 1;
+                } else {
+                    svg.style.opacity = 1;                        // 다시 뻗는 중이면 선명하게
+                }
+                requestAnimationFrame(frame);
+            }
+
+            new_shapes(1);
+            requestAnimationFrame(frame);
+
+            return { done, stop: finish, opt: o };
+        }
+        function reach_to(from, target){
+            const s = stage.getBoundingClientRect();
+            const f = from.getBoundingClientRect();
+            const t = target.getBoundingClientRect();
+            return (t.left - (f.left + f.width / 2)) / s.width * 100 + 3;   // cqw
+        }
+        //-------------------------------------------------
     </script>
 </body>
 </html>
