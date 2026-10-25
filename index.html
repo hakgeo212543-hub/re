@@ -4,13 +4,75 @@
     <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>game</title>
     <style>
-        body {
+        #gameover_text {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(36px, 8vw, 100px);
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.6);
+    animation: go_in 0.4s ease-out;
+}
+@keyframes go_in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+        #start_screen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3vh;
+    background: #D1CFCD;
+    color: #222;
+    text-align: center;
+    transition: opacity 0.4s;
+}
+#start_screen.hide { opacity: 0; pointer-events: none; }
+
+.start_title {
+    margin: 0;
+    font-size: clamp(36px, 8vw, 100px);
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+.start_note {
+    margin: 0;
+    font-size: clamp(12px, 1.4vw, 18px);
+    color: #555;
+}
+
+.start_btn {
+    padding: 0.5em 2em;
+    font-size: clamp(18px, 2.8vw, 34px);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #fff;
+    background: #222;
+    border: none;
+    border-radius: 0.3em;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+.start_btn:hover:not(:disabled) { background: #000; }
+.start_btn:active:not(:disabled) { transform: scale(0.96); }
+.start_btn:disabled { background: #888; cursor: wait; }
+body {
         margin: 0;
         height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #000;   /* 남는 여백 색 */
+        background: #D1CFCD;   /* 남는 여백 색 */
         overflow: hidden;
 }   
 .stage {
@@ -43,6 +105,28 @@
 
         filter: drop-shadow(-0.5cqw 0.8cqw 0.6cqw rgba(231, 231, 231, 0.5));
 }  
+.bear_bar{
+    position: absolute;
+    left: 20cqw;
+    top: 2cqw;
+
+    width: 60cqw;
+    height: 3cqw;
+
+    border: 0.4cqw solid #333;
+
+}
+.bear_health{
+    position: absolute;
+    left: 20.4cqw;
+    top: 2.4cqw;
+     
+    width: 60cqw;
+    height: 3cqw;
+
+    background-color: red;
+
+}
 .fire{
     position: absolute;
     width: 10cqw;
@@ -103,6 +187,23 @@
 
     z-index: 11;
 }
+.zena{
+    -webkit-user-drag: none;      /* 크롬/사파리 드래그 방지 */
+    user-select: none;
+    -webkit-touch-callout: none; 
+
+    position: absolute;
+
+    width: 10cqw;
+    height: auto;
+
+    bottom: 22cqh;
+    left: -50cqw;
+
+    filter: drop-shadow(0cqw 0cqw 1cqw rgba(255, 0, 221, 0.5));
+
+    z-index: 20;
+}
 .word {
     position: absolute;
     left: 0;
@@ -118,13 +219,21 @@
         position:absolute;
         left: 0;
         top: 0;
-        color: aqua;
+        color: rgb(247, 0, 255);
+        text-shadow:
+        -1px -1px 0 #000,  1px -1px 0 #000,
+        -1px  1px 0 #000,  1px  1px 0 #000,
+         0 0 0.6cqw #000;
 }  
 .member_key{
     position:absolute;
     top: 0;
     right: 0;
-    color: aqua;
+    color: rgb(247, 0, 255);
+    text-shadow:
+        -1px -1px 0 #000,  1px -1px 0 #000,
+        -1px  1px 0 #000,  1px  1px 0 #000,
+         0 0 0.6cqw #000;
 }
 .pop {
         animation: pop 0.1s ease-out;
@@ -142,6 +251,7 @@
 
     display: flex;
     gap: 3vw;
+    z-index: 100;
 }     
 .key {
     
@@ -154,7 +264,7 @@
     border-radius: 1vw;
 
     
-    background-color: rgba(200, 200, 200, 0.1);
+    background-color: rgb(68, 68, 68);
 
     color:aliceblue;
 
@@ -175,6 +285,11 @@
     
 </head>
 <body>
+    <div id="start_screen">
+        <h1 class="start_title">BEAR RUSH</h1>
+        <p class="start_note">키를 순서대로 누른 뒤 SPACE로 발동</p>
+        <button id="start_btn" class="start_btn" disabled>LOADING...</button>
+    </div>
     <div class="stage">
     <div class="text">
         <p id="key_list">list:</p>             
@@ -182,7 +297,12 @@
     <div class="member_key">
         <p id="woni_key">woni:a-s-k-l</p>
         <p id="may_key">may:k-k-s-l-k</p>
+        <p id="liv_key">liv:l-l-a-s-k</p>
+        <p id="zena_key">zena:a-k-s-l-k</p>
     </div>  
+
+    <div class="bear_bar"></div>
+    <div class="bear_health" id="health"></div>
     
     <div id="target" class="target">
         <img id="bear" class="bear" src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear_walk0.png">
@@ -202,6 +322,7 @@
     >
 
     <img class = "liv" id="liv" src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/liv.png">
+    <img class="zena" id="zena" src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/zena1.png">
 
     </div>
     <div class="keys">
@@ -243,24 +364,91 @@
         let fire_cool = false;
         let may_cool = false;
         let liv_cool = false;
+        let zena_cool = false;
 
+        //member lvl
+        let fire_lvl = 1;
+        let may_lvl = 1;
+        let liv_lvl = 1;
+        let zena_lvl = 1;
+        
+        //invisible
+        setInterval(() =>{
+            if(liv_cool == false){
+                liv.style.opacity = 0;
+            }
+            else if(liv_cool == true){
+                liv.style.opacity = 1;
+            }
+            if(fire_cool == false){
+                fire.style.opacity = 0;
+            }
+            else if(fire_cool == true){
+                fire.style.opacity = 1;
+            }
+            if(may_cool == false){
+                may.style.opacity = 0;
+            }
+            else if(may_cool == true){
+                may.style.opacity = 1;
+            }
+            if(zena_cool == false){
+                zena.style.opacity = 0;
+            }
+            else if(zena_cool == true){
+                zena.style.opacity = 1;
+            }
+        })
+
+        //pause
+        let pause = true;
 
         
         // 미리 불러오기: 새 Image 객체로 캐시에 저장
-        const preloaded = []; 
-        Object.values(poseMap).forEach(name => {
+        const preloaded = [];
+        const preload_jobs = [];
+            
+        function preload(src){
             const img = new Image();
-            img.src = `${BASE}${name}.png`;
-            img.decode().catch(() => {});   // 미리 디코딩
-            preloaded.push(img);
-        });
-
-        for (let i = 1; i <= 4; i++) {
-            const img = new Image();
-            img.src = `${BASE}fire${i}.png`;
-            img.decode().catch(() => {});   // 미리 디코딩
+            img.src = src;
+            preload_jobs.push(img.decode().catch(() => {}));
             preloaded.push(img);
         }
+        
+        Object.values(poseMap).forEach(name => preload(`${BASE}${name}.png`));
+        for (let i = 1; i <= 8; i++) preload(`${BASE}fire${i}.png`);
+        for (let i = 1; i <= 3; i++) preload(`${BASE}may${i}.png`);
+        for (let i = 1; i <= 3; i++) preload(`${BASE}zena${i}.png`);
+        for (let i = 0; i <= 3; i++) preload(`${BASE}bear_walk${i}.png`);
+        preload(`${BASE}bear_hit.png`);
+        preload(`${BASE}liv.png`);
+        
+        // ------- 시작 화면 -------
+        const start_screen = document.getElementById("start_screen");
+        const start_btn = document.getElementById("start_btn");
+        let started = false;
+        
+        // 이미지가 다 불러와지거나, 8초가 지나면 버튼 활성화
+        Promise.race([Promise.all(preload_jobs), sleep_ms(8000)]).then(() => {
+            start_btn.disabled = false;
+            start_btn.textContent = "START";
+        });
+        function sleep_ms(ms){ return new Promise(r => setTimeout(r, ms)); }
+        
+        function start_game(){
+            if (started || start_btn.disabled) return;
+            started = true;
+            start_screen.classList.add("hide");
+            setTimeout(() => start_screen.remove(), 500);
+            unpause_F();                        // pause=false + 곰 이동 시작
+        }
+        start_btn.addEventListener("click", start_game);
+        document.addEventListener("keydown", e => {
+            if (!started && (e.code === "Enter" || e.code === "Space")) {
+                e.preventDefault();
+                start_game();
+            }
+        });
 
         
 
@@ -273,7 +461,7 @@
         }
         //touch--------------------------------------------------------------
         function tab_down(tab_key){
-            if(is_gameover == false){
+            if(is_gameover == false && pause == false){
                 // p.textContent = `key:${tab_key}`;
                 if (tab_key == "space") {
                     popImage(space);
@@ -317,12 +505,20 @@
                         key_save = [];
                     }          
                 }
+                if (JSON.stringify(key_save) === JSON.stringify(["a", "k", "s", "l", "k"])){
+                    if(zena_cool == false){
+                        zena_trigger(); 
+                    }
+                    else{
+                        key_save = [];
+                    }          
+                }
             }
         }
         //---------------------------------------------------------------
         //keyboard--------------------------------------------------------
         document.addEventListener("keydown", function (event) {
-          if(is_gameover == false){
+          if(is_gameover == false && pause == false){
             if (event.repeat) return;                  // 꾹 누름 방지
             if (event.code === "Space") event.preventDefault();
 
@@ -370,6 +566,14 @@
                     key_save = [];
                 }          
             }
+            if (JSON.stringify(key_save) === JSON.stringify(["a", "k", "s", "l", "k"])){
+                if(zena_cool == false){
+                    zena_trigger(); 
+                }
+                else{
+                    key_save = [];
+                }          
+            }
           } 
         });
         // attact
@@ -399,7 +603,7 @@
                 fire.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire${frame}.png`;
                 
                 if(frame == 3 || frame == 4){
-                    kb();
+                    kb(1*fire_lvl);
                 }
                 if(frame == 8){
                     fire_back(fire_x);
@@ -414,7 +618,7 @@
         }
         function fire_back(fire_x){
             const timer = setInterval(() => {
-                frame = 1;
+                let frame = 1;
                 fire.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire${frame}.png`;
                 fire_x = fire_x + 7;
                 fire.style.right = fire_x+"cqw";                   // 1cqw씩 이동
@@ -429,7 +633,7 @@
         setInterval(() => {
             let woni_key = document.getElementById("woni_key");
             if(fire_cool == false){
-                woni_key.style.color = "aqua";
+                woni_key.style.color = "rgb(247, 0, 255)";
             }
             else{
                 woni_key.style.color = "gray";
@@ -465,7 +669,7 @@
                 
                 if(frame == 3){
                     
-                    kb();
+                    kb(1*may_lvl);
                 }
                 if(times == 30){
                     
@@ -492,7 +696,7 @@
         setInterval(() => {
             let may_key = document.getElementById("may_key");
             if(may_cool == false){
-                may_key.style.color = "aqua";
+                may_key.style.color = "rgb(247, 0, 255)";
             }
             else{
                 may_key.style.color = "gray";
@@ -528,7 +732,7 @@
             const timer = setInterval(() =>{
                 liv_x = Math.max(liv_x-0.5, -30);
                 liv.style.left =  liv_x + "cqw";
-                if((liv_x**2)%5 == 0) kb();
+                if((liv_x**2)%5 == 0) kb(1*liv_lvl);
                 if(liv_x == -30){
                     clearInterval(timer);
                     liv_cool = false;
@@ -536,59 +740,226 @@
             },16);
             
         }
+        setInterval(() => {
+            let liv_key = document.getElementById("liv_key");
+            if(liv_cool == false){
+                liv_key.style.color = "rgb(247, 0, 255)";
+            }
+            else{
+                liv_key.style.color = "gray";
+            }
+        }, 16);
         //-------------------------------------------------------------------
+        
+        
+        //zena------------------------
+        function zena_trigger(){
+            zena_cool = true;
+            
+            
+            key_save = [];
+            let zena_x = -20;
+            
+            const timer = setInterval(() => {
+                zena_x = Math.min(zena_x + 0.5, 15);
+                zena.style.left = zena_x+"cqw";                
+                if (zena_x == 15){
+                    clearInterval(timer);
+                    // play_lines(lines);
+                    setTimeout(() =>{
+                        zena_img(zena_x);
+                    },500);
+                    
+                }
+            }, 16);
+            
+        }
+
+        function zena_img(zena_x){
+            let frame = 1;
+            let peak = false;
+            let times = 0;
+            const timer = setInterval(() => {
+                if(frame == 3){
+                    peak = true;
+                }
+                if(peak == false){
+                    frame = frame+1;
+                }
+                else{
+                    frame -= 1;
+                }
+                
+                times = times + 1;
+                zena.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/zena${frame}.png`;
+                
+                // if(times == 1){
+
+                // }
+                if(times == 4){
+                    clearInterval(timer);
+                    slash(document.getElementById("bear"), 5);  
+                    setTimeout(() =>{
+                        zena_back(zena_x);
+                    },1000);
+                }
+                
+                
+            }, 80);
+        }
+
+        function zena_back(zena_x){
+            const timer = setInterval(() => {
+                zena_x = Math.max(zena_x - 0.5, -50);
+                zena.style.left = zena_x+"cqw";                   
+                if (zena_x == -50){
+                    clearInterval(timer);
+                    zena_cool = false;
+                    
+                }
+            }, 16);
+        }
+
+        setInterval(() => {
+            let zena_key = document.getElementById("zena_key");
+            if(zena_cool == false){
+                zena_key.style.color = "rgb(247, 0, 255)";
+            }
+            else{
+                zena_key.style.color = "gray";
+            }
+        }, 16);
+
+
         //ceo-------------------------------------------------------------------------------
         let bear_x = 5.2;
         let bear = document.getElementById("target");
-        function kb(){
-            if(!is_hit){
+        let width = 60;
+        let lvl = 1;
+        let hit_timer = null;
+        function kb(dmg){
+            if(pause || is_gameover) return;
+            if(!is_hit && !pause){
                 term = 0;
-                const timer = setInterval(() => {
+                hit_timer = setInterval(() => {
                     term = term + 1;
+                    
                     bear_img.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear_hit.png`;
                     if(term == 2){ 
-                        clearInterval(timer);
+                        clearInterval(hit_timer);
                         is_hit = false;
                     }
                 },30);
             }
             
             is_hit = true;
-            bear_x = bear_x - 2;
-            target.style.right = bear_x+"cqw";
-        }
-        const bear_timer = setInterval(() => {
-            time_level = time_level + 0.01;
-            bear_x = bear_x + (1.3*time_level);
-            target.style.right = bear_x+"cqw";
+            if(bear_x - 2 > 1){
+                bear_x = bear_x - 2;
+                target.style.right = bear_x+"cqw";
+            }
             
-            if(bear_x > 70){
-                gameover();
-                clearInterval(bear_timer);
+            damage(dmg);
+        }
+        function damage(dmg){
+            if(pause || is_gameover) return;
+            let health = document.getElementById("health");
+            
+            width-=dmg/lvl;
+            if(width<=0){
+                next_lvl();
             }
-        },300);
+            health.style.width = width+"cqw";
+        }
         let bear_img = document.getElementById("bear");
-        
-        
-        frame = 1;
-        const bear_frame_timer = setInterval(() => {
-            if(is_hit == false){
-                frame = (frame + 1)%4;
-                bear_img.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear_walk${frame}.png`;
+        let bear_img_frame = 1
+        let bear_timer = null;
+        let bear_frame_timer = null;
+        function bear_moving(){
+            bear_timer = setInterval(() => {
+                time_level = time_level + 0.01;
+                bear_x = bear_x + (1.3*time_level);
+                target.style.right = bear_x+"cqw";
+            
                 if(bear_x > 70){
-                    clearInterval(bear_frame_timer);
+                    gameover();
+                    clearInterval(bear_timer);
                 }
-            }
-        },300);
+            },300);
+            
         
         
+            
+            bear_frame_timer = setInterval(() => {
+                if(is_hit == false){
+                    bear_img_frame = (bear_img_frame + 1)%4;
+                    bear_img.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear_walk${bear_img_frame}.png`;
+                    if(bear_x > 70){
+                        clearInterval(bear_frame_timer);
+                    }
+                }
+            },300);
+        
+        }
+        // bear_moving();
         //-------------------------------------------------------------------------------
         
         //gameover-----------------------------------------------------------------------
         function gameover(){
+            if (is_gameover) return;          // 중복 호출 방지
             is_gameover = true;
+            clearInterval(bear_timer);
+            clearInterval(bear_frame_timer);
+                
+            const go = document.createElement("div");
+            go.id = "gameover_text";
+            go.textContent = "GAME OVER";
+            document.body.appendChild(go);
+                
+            setTimeout(() => location.reload(), 1800);   // 시작 화면으로 복귀
         }
         //------------------------------------------------------------------
+        //level-------------------------------------------------------------
+        function next_lvl(){
+            if(pause) return
+            pause_F();
+            lvl+=1;
+
+            bear_x = 5.2;
+            target.style.right = bear_x+"cqw";
+
+            time_level = 1;
+
+            width = 60;
+            health.style.width = width+"cqw";
+
+            clearInterval(hit_timer);
+            is_hit = false;
+            bear_img_frame = 0;
+            bear_img.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear_walk${bear_img_frame}.png`;
+
+            setTimeout(() =>{
+                unpause_F();
+            },1500);
+        }
+        
+
+
+        //pause
+        function pause_F(){
+            if(pause) return;
+            pause = true;
+            clearInterval(bear_timer);
+            clearInterval(bear_frame_timer);
+            
+        }
+        function unpause_F(){
+            pause = false;
+            bear_moving();
+            
+        }
+
+
+        //-------------------------------------------------------------------------
         //may_functions-------------------------------------------------------------
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const rand = (min, max) => min + Math.random() * (max - min);
@@ -780,6 +1151,56 @@
             return (t.left - (f.left + f.width / 2)) / s.width * 100 + 3;   // cqw
         }
         //-------------------------------------------------
+        //zena function------------------------------------
+        function slash(target, count = 3, interval = 120) {
+          const parent = stage;
+          const pr = parent.getBoundingClientRect();
+          const tr = target.getBoundingClientRect();
+                
+          // bear 중심 좌표와 너비를 부모 기준 %로 변환
+          const cx = ((tr.left - pr.left + tr.width / 2) / pr.width) * 100;
+          const cy = ((tr.top - pr.top + tr.height / 2) / pr.height) * 100;
+          const w = (tr.width / pr.width) * 100;
+                
+          for (let i = 0; i < count; i++) {
+            setTimeout(() => {
+              const s = document.createElement("div");
+              const angle = (Math.random() < 0.5 ? -1 : 1) * (20 + Math.random() * 50);
+              const dx = (Math.random() - 0.5) * w * 0.5; // bear 근처에서 살짝 흩어짐
+              const dy = (Math.random() - 0.5) * w * 0.5;
+            
+              Object.assign(s.style, {
+                position: "absolute",
+                left: cx + dx + "%",
+                top: cy + dy + "%",
+                width: w * 1.4 + "%",
+                aspectRatio: "16 / 1",
+                borderRadius: "50%",
+                background: "linear-gradient(90deg, transparent, #BFFFE6 50%, transparent)",
+                filter: "drop-shadow(0 0 6px #8cf)",
+                pointerEvents: "none",
+                zIndex: 999,
+              });
+              parent.appendChild(s);
+            
+              s.animate(
+                [
+                  { transform: `translate(-50%,-50%) rotate(${angle}deg) scaleX(0.2)`, clipPath: "inset(0 100% 0 0)", opacity: 1 },
+                  { transform: `translate(-50%,-50%) rotate(${angle}deg) scaleX(1)`,   clipPath: "inset(0 0 0 0)",    opacity: 1, offset: 0.4 },
+                  { transform: `translate(-50%,-50%) rotate(${angle}deg) scaleX(1.1)`, clipPath: "inset(0 0 0 0)",    opacity: 0 },
+                ],
+                { duration: 280, easing: "ease-out" }
+              ).onfinish = () => s.remove();
+            
+              // 맞는 느낌: bear 살짝 흔들기
+              target.animate(
+                [{ translate: "0 0" }, { translate: "-0.6cqw 0" }, { translate: "0.6cqw 0" }, { translate: "0 0" }],
+                { duration: 120 }
+              );
+              kb(1.5*zena_lvl);
+            }, i * interval);
+          }
+        }
     </script>
 </body>
 </html>
