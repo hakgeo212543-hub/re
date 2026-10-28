@@ -283,13 +283,30 @@ body {
 .space {
     width: 34vw;
 }
+.marquee {
+    position: relative;
+    width: 100%;
+    height: clamp(160px, 34vh, 380px);   /* 이미지 크기: 여기만 조절하면 됨 */
+    overflow: hidden;
+}
+.marquee_img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: auto;
+    will-change: transform;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+}
     </style>
     
 </head>
 <body>
     <div id="start_screen">
         <h1 class="start_title">GGUBLOCK</h1>
-        <p class="start_note"></p>
+        <div class="marquee" id="marquee"></div>
         <button id="start_btn" class="start_btn" disabled>LOADING...</button>
     </div>
     <div class="stage">
@@ -461,6 +478,102 @@ body {
         for (let i = 0; i <= 3; i++) preload(`${BASE}bear_walk${i}.png`);
         preload(`${BASE}bear_hit.png`);
         preload(`${BASE}liv.png`);
+
+
+        // ------- 시작 화면 마퀴 -------
+        const MARQUEE_SRCS = [
+            { src: `${BASE}fire1.png` },
+            { src: `${BASE}may1.png`, flip: true },
+            { src: `${BASE}liv.png` },
+            { src: `${BASE}zena1.png` }
+        ];
+        const MARQUEE_SPEED = 0.08;     // 1초에 화면 폭의 몇 배를 이동할지 (클수록 빠름)
+        let marquee_items = [];
+        let marquee_gap = 0;
+        let marquee_token = 0;
+
+        async function build_marquee(){
+            const box = document.getElementById("marquee");
+            if (!box) return;
+            const token = ++marquee_token;
+            box.textContent = "";
+        
+            const make_set = () => MARQUEE_SRCS.map(d => {
+                const img = new Image();
+                img.className = "marquee_img";
+                img.draggable = false;
+                img.src = d.src;
+                img._flip = !!d.flip;
+                box.appendChild(img);
+                return img;
+            });
+            const wait = list => Promise.all(list.map(i => i.decode().catch(() => {})));
+        
+            // 1) 한 세트로 실제 너비 측정
+            const first = make_set();
+            await wait(first);
+            if (token !== marquee_token) return;
+        
+            marquee_gap = window.innerWidth * 0.06;
+            const W = box.clientWidth;
+            const set_w = first.reduce((s, i) => s + i.offsetWidth + marquee_gap, 0);
+            const max_w = Math.max(...first.map(i => i.offsetWidth));
+        
+            // 2) 화면을 항상 채우도록 세트 수 계산 (한 장이 빠져도 빈틈 없게 여유 확보)
+            const sets = Math.max(1, Math.ceil((W + 2 * (max_w + marquee_gap)) / set_w));
+            let all = [...first];
+            for (let s = 1; s < sets; s++) all.push(...make_set());
+            await wait(all);
+            if (token !== marquee_token) return;
+        
+            // 3) 초기 위치: 왼쪽 → 오른쪽으로 fire, may, liv, zena 순서
+            const total = all.reduce((s, i) => s + i.offsetWidth + marquee_gap, 0);
+            let x = W - total + max_w + marquee_gap;
+            marquee_items = all.map(el => {
+                const it = { el, w: el.offsetWidth, x };
+                x += it.w + marquee_gap;
+                return it;
+            });
+        }
+
+        let marquee_last = 0;
+        function marquee_loop(now){
+            const box = document.getElementById("marquee");
+            if (!box) return;                           // 시작 화면이 사라지면 종료
+        
+            const dt = Math.min(now - marquee_last, 50) / 1000;
+            marquee_last = now;
+        
+            if (marquee_items.length){
+                const W = box.clientWidth;
+                const move = W * MARQUEE_SPEED * dt;
+            
+                marquee_items.forEach(it => { it.x += move; });
+            
+                // 화면 오른쪽 밖으로 완전히 나간 이미지 → 맨 왼쪽 뒤로 보냄
+                marquee_items.forEach(it => {
+                    if (it.x > W){
+                        const min_x = Math.min(...marquee_items.map(o => o.x));
+                        it.x = min_x - it.w - marquee_gap;
+                    }
+                });
+            
+                marquee_items.forEach(it => {
+                    it.el.style.transform =
+                        `translateX(${it.x}px)` + (it.el._flip ? " scaleX(-1)" : "");
+                });
+            }
+            requestAnimationFrame(marquee_loop);
+        }
+
+        build_marquee();
+        requestAnimationFrame(marquee_loop);
+
+        let marquee_resize_timer = null;
+        window.addEventListener("resize", () => {
+            clearTimeout(marquee_resize_timer);
+            marquee_resize_timer = setTimeout(build_marquee, 150);
+        });
         
         // ------- 시작 화면 -------
         const start_screen = document.getElementById("start_screen");
