@@ -103,7 +103,8 @@ body {
         height: 35cqw;
         transform: translateY(-50%) scaleX(-1);
 
-        filter: drop-shadow(-0.5cqw 0.8cqw 0.6cqw rgba(231, 231, 231, 0.5));
+        filter: drop-shadow(0cqw 0cqw 0.6cqw rgba(0, 0, 0, 1));
+        transition: filter 1.5s;
 }  
 .bear_bar{
     position: absolute;
@@ -147,7 +148,8 @@ body {
         height: 50cqh;             /* 화면 높이의 1/2 */
         object-fit: cover;
         
-        filter: drop-shadow(-0.5cqw 0.8cqw 0.6cqw rgba(231, 231, 231, 0.5));
+        filter: drop-shadow(-0.5cqw 0.8cqw 0.6cqw rgba(255, 1, 179, 0.5));
+        transition: filter 0.1s;
 
         z-index: 1;
 }   
@@ -260,11 +262,11 @@ body {
 
     
 
-    border: 0.4vw solid #333;
+    border: 0.4vw solid rgba(12, 12, 12, 0.1);
     border-radius: 1vw;
 
     
-    background-color: rgb(68, 68, 68);
+    background-color: rgba(68, 68, 68, 0.2);
 
     color:aliceblue;
 
@@ -286,8 +288,8 @@ body {
 </head>
 <body>
     <div id="start_screen">
-        <h1 class="start_title">BEAR RUSH</h1>
-        <p class="start_note">키를 순서대로 누른 뒤 SPACE로 발동</p>
+        <h1 class="start_title">GGUBLOCK</h1>
+        <p class="start_note"></p>
         <button id="start_btn" class="start_btn" disabled>LOADING...</button>
     </div>
     <div class="stage">
@@ -343,7 +345,44 @@ body {
             KeyL: "l",
             Space: "space"
         };
+
+    //sound
+        const sounds = {
+          fire: new Audio("https://raw.githubusercontent.com/hakgeo212543-hub/re/sounds/pha.wav")
+        };
         
+        Object.values(sounds).forEach(s => {
+          s.preload = "auto";
+          s.load();
+        });
+
+    //bgm
+        
+        const bgm1 = new Audio("https://raw.githubusercontent.com/hakgeo212543-hub/re/sounds/BGM1.mp3");
+        const bgm2 = new Audio("https://raw.githubusercontent.com/hakgeo212543-hub/re/sounds/BGM2.mp3");
+
+        bgm1.preload = "auto";
+        bgm2.preload = "auto";
+
+        bgm1.addEventListener("ended", () => {
+          bgm2.currentTime = 0;
+          bgm2.play();
+        });
+        bgm2.addEventListener("ended", () => {
+          bgm1.currentTime = 0;
+          bgm1.play();
+        });
+        
+        let bgmStarted = false;
+
+        document.addEventListener("keydown", () => {
+          if (bgmStarted) return;
+          bgmStarted = true;
+          bgm1.play();
+        });
+
+
+
         let time_level = 1;
         let is_gameover = false;
 
@@ -416,7 +455,7 @@ body {
         }
         
         Object.values(poseMap).forEach(name => preload(`${BASE}${name}.png`));
-        for (let i = 1; i <= 8; i++) preload(`${BASE}fire${i}.png`);
+        for (let i = 1; i <= 4; i++) preload(`${BASE}fire${i}.png`);
         for (let i = 1; i <= 3; i++) preload(`${BASE}may${i}.png`);
         for (let i = 1; i <= 3; i++) preload(`${BASE}zena${i}.png`);
         for (let i = 0; i <= 3; i++) preload(`${BASE}bear_walk${i}.png`);
@@ -458,6 +497,10 @@ body {
             el.classList.remove("pop");
             void el.offsetWidth;
             el.classList.add("pop");
+            minam.style.filter = `drop-shadow(-0.5cqw 0.8cqw 10cqw rgba(255, 1, 179, 0.5))`;
+            setTimeout(() =>{
+                minam.style.filter = `drop-shadow(-0.5cqw 0.8cqw 0.6cqw rgba(255, 1, 179, 0.5))`;
+            },50);
         }
         //touch--------------------------------------------------------------
         function tab_down(tab_key){
@@ -591,6 +634,8 @@ body {
                 if (fire_x < 20){
                     clearInterval(timer);
                     fire_img(fire_x);
+                    sounds.fire.currentTime = 0;
+                    sounds.fire.play();
                 }
             }, 16);
             
@@ -874,6 +919,7 @@ body {
         let bear_img_frame = 1
         let bear_timer = null;
         let bear_frame_timer = null;
+        
         function bear_moving(){
             bear_timer = setInterval(() => {
                 time_level = time_level + 0.01;
@@ -937,6 +983,8 @@ body {
             bear_img_frame = 0;
             bear_img.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear_walk${bear_img_frame}.png`;
 
+            bear_img.style.filter = `drop-shadow(0cqw 0cqw ${lvl*2}cqw rgba(0, 0, 0, 1))`;
+
             setTimeout(() =>{
                 unpause_F();
             },1500);
@@ -960,6 +1008,11 @@ body {
 
 
         //-------------------------------------------------------------------------
+
+
+        
+
+
         //may_functions-------------------------------------------------------------
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         const rand = (min, max) => min + Math.random() * (max - min);
