@@ -592,6 +592,11 @@ body {
             started = true;
             start_screen.classList.add("hide");
             setTimeout(() => start_screen.remove(), 500);
+            if (!bgmStarted){
+                bgmStarted = true;
+                bgm1.play();
+            }
+            
             unpause_F();                        // pause=false + 곰 이동 시작
         }
         start_btn.addEventListener("click", start_game);
