@@ -4,6 +4,50 @@
     <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>game</title>
     <style>
+        @property --half {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 55deg;
+}
+@property --lit {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+}
+#spotlight.lit { animation: spot_lit 0.6s ease-out; }
+@keyframes spot_lit {
+    from { --lit: var(--peak); }
+    to   { --lit: 0; }
+}
+#spotlight {
+    --hx: 15vw;       /* 밝아지는 영역 중심 (JS가 자동으로 맞춤) */
+    --hy: 40vh;
+    --hr: 30vmax;     /* 반지름 (JS가 자동으로 맞춤) */
+    --hs: 10vmax;     /* 가장자리 부드러움 */
+    --peak: 0.6;      /* 번쩍일 때 얼마나 밝아지는지 (JS가 바꿈) */
+    -webkit-mask-image: radial-gradient(circle var(--hr) at var(--hx) var(--hy),
+        rgba(0, 0, 0, calc(1 - var(--lit))) 0,
+        rgba(0, 0, 0, calc(1 - var(--lit))) calc(var(--hr) - var(--hs)),
+        #000 var(--hr));
+    mask-image: radial-gradient(circle var(--hr) at var(--hx) var(--hy),
+        rgba(0, 0, 0, calc(1 - var(--lit))) 0,
+        rgba(0, 0, 0, calc(1 - var(--lit))) calc(var(--hr) - var(--hs)),
+        #000 var(--hr));
+    --half: 55deg;     /* 밝은 영역 반쪽 각도 (JS에서 조절) */
+    --soft: 15deg;     /* 경계 부드러움 */
+    position: fixed;
+    inset: 0;
+    z-index: 1000000001;
+    pointer-events: none;
+    background:
+        linear-gradient(to bottom, transparent 55%, rgba(0, 0, 0, 0.35)),
+        conic-gradient(
+            from 0deg at var(--sx, 50%) -5%,
+            rgba(0, 0, 0, 0.75) 0deg calc(180deg - var(--half) - var(--soft)),
+            transparent calc(180deg - var(--half)) calc(180deg + var(--half)),
+            rgba(0, 0, 0, 0.75) calc(180deg + var(--half) + var(--soft)) 360deg
+        );
+}
         #gameover_text {
     position: fixed;
     inset: 0;
@@ -25,7 +69,7 @@
         #start_screen {
     position: fixed;
     inset: 0;
-    z-index: 1000;
+    z-index: 1000000000;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -93,6 +137,7 @@ body {
     width: 0;
     height: 0;
     z-index: 2;
+    transition: right 0.5s;
 }
 .bear {
         position: absolute;
@@ -105,6 +150,9 @@ body {
 
         filter: drop-shadow(0cqw 0cqw 0.6cqw rgba(0, 0, 0, 1));
         transition: filter 1.5s;
+
+        z-index: 1;
+        
 }  
 .bear_bar{
     position: absolute;
@@ -116,6 +164,8 @@ body {
 
     border: 0.4cqw solid #333;
 
+    z-index: 100000;
+
 }
 .bear_health{
     position: absolute;
@@ -126,6 +176,8 @@ body {
     height: 3cqw;
 
     background-color: red;
+
+    z-index: 100000;
 
 }
 .fire{
@@ -151,7 +203,9 @@ body {
         filter: drop-shadow(-0.5cqw 0.8cqw 0.6cqw rgba(255, 1, 179, 0.5));
         transition: filter 0.1s;
 
-        z-index: 1;
+        z-index: 2;
+
+        
 }   
 .may{
     -webkit-user-drag: none;      /* 크롬/사파리 드래그 방지 */
@@ -188,6 +242,8 @@ body {
     filter: drop-shadow(0cqw 0cqw 1cqw rgba(255, 151, 241, 0.5));
 
     z-index: 11;
+
+    
 }
 .zena{
     -webkit-user-drag: none;      /* 크롬/사파리 드래그 방지 */
@@ -226,6 +282,8 @@ body {
         -1px -1px 0 #000,  1px -1px 0 #000,
         -1px  1px 0 #000,  1px  1px 0 #000,
          0 0 0.6cqw #000;
+
+         z-index: 100000;
 }  
 .member_key{
     position:absolute;
@@ -236,6 +294,8 @@ body {
         -1px -1px 0 #000,  1px -1px 0 #000,
         -1px  1px 0 #000,  1px  1px 0 #000,
          0 0 0.6cqw #000;
+
+    
 }
 .pop {
         animation: pop 0.1s ease-out;
@@ -283,6 +343,8 @@ body {
 .space {
     width: 34vw;
 }
+
+/* 이미지 순환 */
 .marquee {
     position: relative;
     width: 100%;
@@ -299,14 +361,121 @@ body {
     user-select: none;
     -webkit-user-drag: none;
     pointer-events: none;
+
+    transition: left 1s;
+}
+
+/* state */
+.stat_panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2vh;
+}
+.stat_points {
+    font-size: clamp(14px, 1.8vw, 24px);
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+.stat_row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.2vw;
+}
+.stat_card {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    padding: 0.4em 0.8em;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 0.5em;
+    font-size: clamp(12px, 1.6vw, 20px);
+    font-weight: 700;
+}
+.stat_name { min-width: 3.5em; text-align: left; }
+.stat_lvl  { min-width: 3em; text-align: center; }
+.stat_btn {
+    width: 1.8em;
+    height: 1.8em;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: #222;
+    color: #fff;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+.stat_btn:hover:not(:disabled) { background: #000; }
+.stat_btn:active:not(:disabled) { transform: scale(0.9); }
+.stat_btn:disabled { background: #999; cursor: not-allowed; }
+.minam_light {
+    --mx: 15cqw;                  /* 빛이 시작되는 가로 위치 (minam 중앙쯤) */
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.beam {
+    position: absolute;
+    left: calc(var(--mx) - 7cqw);
+    top: 0;
+    width: 14cqw;
+    height: 46cqw;
+    transform-origin: 50% 0;      /* 꼭짓점(위쪽 중앙)을 기준으로 회전 */
+    clip-path: polygon(50% 0, 100% 100%, 0 100%);   /* 삼각형 */
+    mix-blend-mode: screen;
+    opacity: 0;                   /* 평소에는 꺼져 있음 */
+    z-index: 1000000002;
+}
+.beam.pink  { transform: rotate(-16deg); background: linear-gradient(to bottom, rgba(255, 79, 216, 0.9), rgba(255, 79, 216, 0)); }
+.beam.green { transform: rotate(0deg);   background: linear-gradient(to bottom, rgba(61, 255, 122, 0.9), rgba(61, 255, 122, 0)); }
+.beam.blue  { transform: rotate(16deg);  background: linear-gradient(to bottom, rgba(77, 166, 255, 0.9), rgba(77, 166, 255, 0)); }
+
+.beam.flash { animation: beam_flash 0.6s ease-out; }
+@keyframes beam_flash {
+    0%   { opacity: 1; }
+    100% { opacity: 0; }
 }
     </style>
     
 </head>
 <body>
+    <div id="spotlight"></div>
     <div id="start_screen">
         <h1 class="start_title">GGUBLOCK</h1>
         <div class="marquee" id="marquee"></div>
+
+        <div class="stat_panel">
+            <div class="stat_points">POINT: <span id="stat_points">10</span></div>
+            <div class="stat_row">
+                <div class="stat_card">
+                    <span class="stat_name">FIRE</span>
+                    <button class="stat_btn" data-stat="fire" data-d="-1">−</button>
+                    <span class="stat_lvl" id="stat_fire">Lv.1</span>
+                    <button class="stat_btn" data-stat="fire" data-d="1">+</button>
+                </div>
+                <div class="stat_card">
+                    <span class="stat_name">MAY</span>
+                    <button class="stat_btn" data-stat="may" data-d="-1">−</button>
+                    <span class="stat_lvl" id="stat_may">Lv.1</span>
+                    <button class="stat_btn" data-stat="may" data-d="1">+</button>
+                </div>
+                <div class="stat_card">
+                    <span class="stat_name">LIV</span>
+                    <button class="stat_btn" data-stat="liv" data-d="-1">−</button>
+                    <span class="stat_lvl" id="stat_liv">Lv.1</span>
+                    <button class="stat_btn" data-stat="liv" data-d="1">+</button>
+                </div>
+                <div class="stat_card">
+                    <span class="stat_name">ZENA</span>
+                    <button class="stat_btn" data-stat="zena" data-d="-1">−</button>
+                    <span class="stat_lvl" id="stat_zena">Lv.1</span>
+                    <button class="stat_btn" data-stat="zena" data-d="1">+</button>
+                </div>
+            </div>
+        </div>
+
         <button id="start_btn" class="start_btn" disabled>LOADING...</button>
     </div>
     <div class="stage">
@@ -333,6 +502,11 @@ body {
         id="minam"
         src="https://raw.githubusercontent.com/hakgeo212543-hub/re/img/a.png"
     >
+    <div class="minam_light">
+        <div class="beam pink"></div>
+        <div class="beam green"></div>
+        <div class="beam blue"></div>
+    </div>
 
     <img
         class="may" 
@@ -427,6 +601,48 @@ body {
         let may_lvl = 1;
         let liv_lvl = 1;
         let zena_lvl = 1;
+
+
+        // ------- 스탯창 -------
+        let stat_points = 10;      // 나눠줄 수 있는 총 포인트
+        const STAT_MAX = 10;       // 캐릭터당 최대 레벨
+            
+        const stat_vars = {
+            fire: [() => fire_lvl, v => { fire_lvl = v; }],
+            may:  [() => may_lvl,  v => { may_lvl  = v; }],
+            liv:  [() => liv_lvl,  v => { liv_lvl  = v; }],
+            zena: [() => zena_lvl, v => { zena_lvl = v; }]
+        };
+        
+        function stat_render(){
+            document.getElementById("stat_points").textContent = stat_points;
+            document.querySelectorAll(".stat_btn").forEach(btn => {
+                const cur = stat_vars[btn.dataset.stat][0]();
+                const d = Number(btn.dataset.d);
+                btn.disabled = d > 0 ? (stat_points <= 0 || cur >= STAT_MAX) : (cur <= 1);
+            });
+            for (const name in stat_vars){
+                document.getElementById("stat_" + name).textContent = "Lv." + stat_vars[name][0]();
+            }
+        }
+        
+        function stat_change(name, d){
+            const [get, set] = stat_vars[name];
+            const cur = get();
+            if (d > 0 && (stat_points <= 0 || cur >= STAT_MAX)) return;
+            if (d < 0 && cur <= 1) return;
+            set(cur + d);
+            stat_points -= d;
+            stat_render();
+        }
+        
+        document.querySelectorAll(".stat_btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                stat_change(btn.dataset.stat, Number(btn.dataset.d));
+                btn.blur();   // 포커스가 남아 스페이스가 버튼을 누르는 것 방지
+            });
+        });
+        stat_render();
         
         //invisible
         setInterval(() =>{
@@ -480,6 +696,25 @@ body {
         preload(`${BASE}liv.png`);
 
 
+
+        // ------- 스포트라이트 -------
+        const SPOT_START = 55;    // 시작 화면 밝은 영역 반쪽 각도 (클수록 넓음)
+        const SPOT_END   = 25;    // 게임 중 밝은 영역 반쪽 각도 (작을수록 좁음)
+        const SPOT_TIME  = 2;     // 줄어드는 데 걸리는 시간(초)
+
+        const spotlight = document.getElementById("spotlight");
+        spotlight.style.setProperty("--half", SPOT_START + "deg");
+
+        function spot_shrink(){
+            spotlight.style.transition = `--half ${SPOT_TIME}s ease-in-out`;
+            spotlight.style.setProperty("--half", SPOT_END + "deg");
+        }
+        function spot_reset(){
+            spotlight.style.transition = `--half ${SPOT_TIME}s ease-in-out`;
+            spotlight.style.setProperty("--half", SPOT_START + "deg");
+        }
+
+
         // ------- 시작 화면 마퀴 -------
         const MARQUEE_SRCS = [
             { src: `${BASE}fire1.png` },
@@ -487,7 +722,7 @@ body {
             { src: `${BASE}liv.png` },
             { src: `${BASE}zena1.png` }
         ];
-        const MARQUEE_SPEED = 0.08;     // 1초에 화면 폭의 몇 배를 이동할지 (클수록 빠름)
+        let MARQUEE_SPEED = 0.08;     // 1초에 화면 폭의 몇 배를 이동할지 (클수록 빠름)
         let marquee_items = [];
         let marquee_gap = 0;
         let marquee_token = 0;
@@ -537,9 +772,16 @@ body {
         }
 
         let marquee_last = 0;
+        let marquee_paused = false;   // 페이드 아웃이 끝난 뒤에만 true
         function marquee_loop(now){
             const box = document.getElementById("marquee");
-            if (!box) return;                           // 시작 화면이 사라지면 종료
+            if (!box) return;     // 시작 화면이 사라지면 종료
+            
+            if (marquee_paused){                // 게임 중에는 마퀴 멈춤 (페이드 아웃 후)
+                marquee_last = now;
+                requestAnimationFrame(marquee_loop);
+                return;
+            }
         
             const dt = Math.min(now - marquee_last, 50) / 1000;
             marquee_last = now;
@@ -591,15 +833,35 @@ body {
             if (started || start_btn.disabled) return;
             started = true;
             start_screen.classList.add("hide");
-            setTimeout(() => start_screen.remove(), 500);
+
+            spot_shrink(); 
+
+            setTimeout(() => { if (started) marquee_paused = true; }, 500);   // 페이드(0.4초)가 끝난 뒤 멈춤
             if (!bgmStarted){
                 bgmStarted = true;
                 bgm1.play();
             }
-            
-            unpause_F();                        // pause=false + 곰 이동 시작
+        
+            unpause_F();
         }
-        start_btn.addEventListener("click", start_game);
+
+        let start_anime_timer = null;
+
+        function start_anime(){
+            if (start_anime_timer) return;   // 중복 클릭 방지
+            document.querySelectorAll(".stat_btn").forEach(b => b.disabled = true);
+            MARQUEE_SPEED = 0.08;
+            start_anime_timer = setInterval(() => {
+                MARQUEE_SPEED += 0.1;
+                if (MARQUEE_SPEED >= 1){
+                    clearInterval(start_anime_timer);
+                    start_anime_timer = null;
+                    start_game();
+                }
+            }, 100);
+        }
+
+        start_btn.addEventListener("click", start_anime);
         document.addEventListener("keydown", e => {
             if (!started && (e.code === "Enter" || e.code === "Space")) {
                 e.preventDefault();
@@ -608,13 +870,58 @@ body {
         });
 
         
+        const beams = [...document.querySelectorAll(".beam")];   // 분홍, 초록, 파랑 순서
 
+        const LIT_SINGLE = 0.9;   // 1색이 켜질 때 밝아지는 정도 (0~1)
+        const LIT_DOUBLE = 1;   // 2색이 동시에 켜질 때
+
+        // 세 빛줄기를 감싸는 영역에 구멍 위치/크기를 맞춤
+        function spot_hole(){
+            const rs = beams.map(b => b.getBoundingClientRect());
+            const left   = Math.min(...rs.map(r => r.left));
+            const right  = Math.max(...rs.map(r => r.right));
+            const top    = Math.min(...rs.map(r => r.top));
+            const bottom = Math.max(...rs.map(r => r.bottom));
+            spotlight.style.setProperty("--hx", (left + right) / 2 + "px");
+            spotlight.style.setProperty("--hy", (top + bottom) / 2 + "px");
+            spotlight.style.setProperty("--hr", Math.max(right - left, bottom - top) * 0.7 + "px");
+        }
+        window.addEventListener("load", () => requestAnimationFrame(spot_hole));
+        window.addEventListener("resize", spot_hole);
+
+        function spot_lit(peak){
+            spotlight.style.setProperty("--peak", peak);
+            spotlight.classList.remove("lit");
+            void spotlight.offsetWidth;          // 애니메이션 재시작
+            spotlight.classList.add("lit");
+        }
+
+        const DOUBLE_CHANCE = 0.2;    // 2색이 동시에 켜질 확률 (0~1)
+        let beam_idx = 0;
+
+        function light(b){
+            b.classList.remove("flash");
+            void b.offsetWidth;       // 애니메이션 재시작
+            b.classList.add("flash");
+        }
+
+        function beam_flash(){
+            light(beams[beam_idx]);
+            let used = 1;
+            if (Math.random() < DOUBLE_CHANCE){            // 가끔 다음 색도 같이
+                light(beams[(beam_idx + 1) % beams.length]);
+                used = 2;
+            }
+            beam_idx = (beam_idx + used) % beams.length;   // 켠 만큼 순서를 넘김
+            spot_lit(used === 2 ? LIT_DOUBLE : LIT_SINGLE);
+        }
         function popImage(target) {
             const el = typeof target === "string" ? document.getElementById(target) : target;
             if (!el) return;
             el.classList.remove("pop");
             void el.offsetWidth;
             el.classList.add("pop");
+            if (el === minam) beam_flash(); 
             minam.style.filter = `drop-shadow(-0.5cqw 0.8cqw 10cqw rgba(255, 1, 179, 0.5))`;
             setTimeout(() =>{
                 minam.style.filter = `drop-shadow(-0.5cqw 0.8cqw 0.6cqw rgba(255, 1, 179, 0.5))`;
@@ -768,13 +1075,12 @@ body {
                 if(frame == 3 || frame == 4){
                     kb(1*fire_lvl);
                 }
-                if(frame == 8){
+                
+                else if(frame == 5){              
+                    fire.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire1.png`;
                     fire_back(fire_x);
                     
                     clearInterval(timer);
-                }
-                else if(frame >= 5){              
-                    fire.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/fire1.png`;
                 }
                 
             }, 80);
@@ -1073,13 +1379,77 @@ body {
             is_gameover = true;
             clearInterval(bear_timer);
             clearInterval(bear_frame_timer);
-                
+
             const go = document.createElement("div");
             go.id = "gameover_text";
             go.textContent = "GAME OVER";
             document.body.appendChild(go);
-                
-            setTimeout(() => location.reload(), 1800);   // 시작 화면으로 복귀
+
+            // 최소 1.8초 보여주고, 날아가던 공격 연출이 끝나면(쿨타임 해제) 초기화
+            const t0 = performance.now();
+            const wait = setInterval(() => {
+                const idle = !fire_cool && !may_cool && !liv_cool && !zena_cool;
+                const elapsed = performance.now() - t0;
+                if ((idle && elapsed >= 1800) || elapsed >= 8000){
+                    clearInterval(wait);
+                    reset_game();
+                }
+            }, 100);
+        }
+
+        function reset_game(){
+            // 게임오버 문구, 날아다니는 글자 제거
+            const go = document.getElementById("gameover_text");
+            if (go) go.remove();
+            stop_lines();
+            
+        
+            // 곰
+            clearInterval(hit_timer);
+            is_hit = false;
+            lvl = 1;
+            time_level = 1;
+            bear_x = 5.2;
+            width = 60;
+            target.style.right = bear_x + "cqw";
+            health.style.width = width + "cqw";
+            bear_img_frame = 1;
+            bear_img.src = `${BASE}bear_walk0.png`;
+            bear_img.style.filter = "drop-shadow(0cqw 0cqw 0.6cqw rgba(0, 0, 0, 1))";
+        
+            // 캐릭터 위치/이미지/쿨타임
+            fire_cool = may_cool = liv_cool = zena_cool = false;
+            fire.style.right = "150cqw";
+            fire.src = `${BASE}fire1.png`;
+            may.style.left = "-100cqw";
+            may.src = `${BASE}may1.png`;
+            liv.style.left = "-50cqw";
+            liv.style.bottom = "50cqh";
+            liv.style.rotate = "0deg";
+            zena.style.left = "-50cqw";
+            zena.src = `${BASE}zena1.png`;
+            minam.src = `${BASE}a.png`;
+        
+            // 입력 상태
+            key_list = [];
+            key_save = [];
+            keys.textContent = "list:";
+        
+            // 게임 상태 (fire_lvl 등 레벨과 stat_points는 일부러 건드리지 않음)
+            pause = true;
+            is_gameover = false;
+        
+            // 시작 화면 복귀
+            clearInterval(start_anime_timer);
+            start_anime_timer = null;
+            MARQUEE_SPEED = 0.08;
+            marquee_paused = false; 
+            started = false;
+            spot_reset();
+            start_btn.disabled = false;
+            start_btn.textContent = "START";
+            stat_render();                          // 스탯 버튼 다시 활성화
+            start_screen.classList.remove("hide");  // 페이드 인
         }
         //------------------------------------------------------------------
         //level-------------------------------------------------------------
@@ -1101,7 +1471,8 @@ body {
             bear_img_frame = 0;
             bear_img.src = `https://raw.githubusercontent.com/hakgeo212543-hub/re/img/bear_walk${bear_img_frame}.png`;
 
-            bear_img.style.filter = `drop-shadow(0cqw 0cqw ${lvl*2}cqw rgba(0, 0, 0, 1))`;
+            let bear_shadow = `drop-shadow(0cqw 0cqw ${lvl*2}cqw rgba(0, 0, 0, 1)) `
+            bear_img.style.filter = bear_shadow.repeat(lvl);
 
             setTimeout(() =>{
                 unpause_F();
