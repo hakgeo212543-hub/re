@@ -20,10 +20,10 @@
     to   { --lit: 0; }
 }
 #spotlight {
-    --hx: 15vw;       /* 밝아지는 영역 중심 (JS가 자동으로 맞춤) */
-    --hy: 40vh;
-    --hr: 30vmax;     /* 반지름 (JS가 자동으로 맞춤) */
-    --hs: 10vmax;     /* 가장자리 부드러움 */
+    --hx: 15cqw;       /* 밝아지는 영역 중심 (JS가 자동으로 맞춤) */
+    --hy: 40cqh;
+    --hr: 30cqmax;     /* 반지름 (JS가 자동으로 맞춤) */
+    --hs: 10cqmax;     /* 가장자리 부드러움 */
     --peak: 0.6;      /* 번쩍일 때 얼마나 밝아지는지 (JS가 바꿈) */
     -webkit-mask-image: radial-gradient(circle var(--hr) at var(--hx) var(--hy),
         rgba(0, 0, 0, calc(1 - var(--lit))) 0,
@@ -35,7 +35,7 @@
         #000 var(--hr));
     --half: 55deg;     /* 밝은 영역 반쪽 각도 (JS에서 조절) */
     --soft: 15deg;     /* 경계 부드러움 */
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 1000000001;
     pointer-events: none;
@@ -49,13 +49,13 @@
         );
 }
         #gameover_text {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 900;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(36px, 8vw, 100px);
+    font-size: clamp(36px, 8cqw, 100px);
     font-weight: 800;
     letter-spacing: 0.1em;
     color: #fff;
@@ -67,14 +67,14 @@
     to   { opacity: 1; }
 }
         #start_screen {
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 1000000000;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3vh;
+    gap: 3cqh;
     background: #D1CFCD;
     color: #222;
     text-align: center;
@@ -84,20 +84,20 @@
 
 .start_title {
     margin: 0;
-    font-size: clamp(36px, 8vw, 100px);
+    font-size: clamp(36px, 8cqw, 100px);
     font-weight: 800;
     letter-spacing: 0.1em;
 }
 
 .start_note {
     margin: 0;
-    font-size: clamp(12px, 1.4vw, 18px);
+    font-size: clamp(12px, 1.4cqw, 18px);
     color: #555;
 }
 
 .start_btn {
     padding: 0.5em 2em;
-    font-size: clamp(18px, 2.8vw, 34px);
+    font-size: clamp(18px, 2.8cqw, 34px);
     font-weight: 700;
     letter-spacing: 0.1em;
     color: #fff;
@@ -283,7 +283,7 @@ body {
         -1px  1px 0 #000,  1px  1px 0 #000,
          0 0 0.6cqw #000;
 
-         z-index: 100000;
+         z-index: 1000;
 }  
 .member_key{
     position:absolute;
@@ -348,7 +348,7 @@ body {
 .marquee {
     position: relative;
     width: 100%;
-    height: clamp(160px, 34vh, 380px);   /* 이미지 크기: 여기만 조절하면 됨 */
+    height: clamp(160px, 34cqh, 380px);   /* 이미지 크기: 여기만 조절하면 됨 */
     overflow: hidden;
 }
 .marquee_img {
@@ -370,10 +370,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.2vh;
+    gap: 1.2cqh;
 }
 .stat_points {
-    font-size: clamp(14px, 1.8vw, 24px);
+    font-size: clamp(14px, 1.8cqw, 24px);
     font-weight: 800;
     letter-spacing: 0.1em;
 }
@@ -381,7 +381,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 1.2vw;
+    gap: 1.2cqw;
 }
 .stat_card {
     display: flex;
@@ -390,7 +390,7 @@ body {
     padding: 0.4em 0.8em;
     background: rgba(0, 0, 0, 0.08);
     border-radius: 0.5em;
-    font-size: clamp(12px, 1.6vw, 20px);
+    font-size: clamp(12px, 1.6cqw, 20px);
     font-weight: 700;
 }
 .stat_name { min-width: 3.5em; text-align: left; }
@@ -441,8 +441,10 @@ body {
     
 </head>
 <body>
-    <div id="spotlight"></div>
-    <div id="start_screen">
+    
+    
+    <div class="stage">
+        <div id="start_screen">
         <h1 class="start_title">GGUBLOCK</h1>
         <div class="marquee" id="marquee"></div>
 
@@ -478,11 +480,12 @@ body {
 
         <button id="start_btn" class="start_btn" disabled>LOADING...</button>
     </div>
-    <div class="stage">
-    <div class="text">
+        <div id="spotlight"></div>
+    
+    <div class="text" id="text">
         <p id="key_list">list:</p>             
     </div>
-    <div class="member_key">
+    <div class="member_key" id="member_key">
         <p id="woni_key">woni:a-s-k-l</p>
         <p id="may_key">may:k-k-s-l-k</p>
         <p id="liv_key">liv:l-l-a-s-k</p>
@@ -699,7 +702,7 @@ body {
 
         // ------- 스포트라이트 -------
         const SPOT_START = 55;    // 시작 화면 밝은 영역 반쪽 각도 (클수록 넓음)
-        const SPOT_END   = 25;    // 게임 중 밝은 영역 반쪽 각도 (작을수록 좁음)
+        const SPOT_END   = 45;    // 게임 중 밝은 영역 반쪽 각도 (작을수록 좁음)
         const SPOT_TIME  = 2;     // 줄어드는 데 걸리는 시간(초)
 
         const spotlight = document.getElementById("spotlight");
@@ -749,7 +752,7 @@ body {
             await wait(first);
             if (token !== marquee_token) return;
         
-            marquee_gap = window.innerWidth * 0.06;
+            marquee_gap = stage.clientWidth * 0.06;
             const W = box.clientWidth;
             const set_w = first.reduce((s, i) => s + i.offsetWidth + marquee_gap, 0);
             const max_w = Math.max(...first.map(i => i.offsetWidth));
@@ -856,6 +859,15 @@ body {
                 if (MARQUEE_SPEED >= 1){
                     clearInterval(start_anime_timer);
                     start_anime_timer = null;
+
+                    let text = document.getElementById("text");
+                    text.style.zIndex = 10000000000000;
+                    let member_key = document.getElementById("member_key");
+                    member_key.style.zIndex = 10000000000000;
+
+
+
+
                     start_game();
                 }
             }, 100);
@@ -865,7 +877,7 @@ body {
         document.addEventListener("keydown", e => {
             if (!started && (e.code === "Enter" || e.code === "Space")) {
                 e.preventDefault();
-                start_game();
+                start_anime();
             }
         });
 
@@ -877,13 +889,14 @@ body {
 
         // 세 빛줄기를 감싸는 영역에 구멍 위치/크기를 맞춤
         function spot_hole(){
+            const s = stage.getBoundingClientRect();
             const rs = beams.map(b => b.getBoundingClientRect());
             const left   = Math.min(...rs.map(r => r.left));
             const right  = Math.max(...rs.map(r => r.right));
             const top    = Math.min(...rs.map(r => r.top));
             const bottom = Math.max(...rs.map(r => r.bottom));
-            spotlight.style.setProperty("--hx", (left + right) / 2 + "px");
-            spotlight.style.setProperty("--hy", (top + bottom) / 2 + "px");
+            spotlight.style.setProperty("--hx", (left + right) / 2 - s.left + "px");
+            spotlight.style.setProperty("--hy", (top + bottom) / 2 - s.top + "px");
             spotlight.style.setProperty("--hr", Math.max(right - left, bottom - top) * 0.7 + "px");
         }
         window.addEventListener("load", () => requestAnimationFrame(spot_hole));
@@ -1383,7 +1396,7 @@ body {
             const go = document.createElement("div");
             go.id = "gameover_text";
             go.textContent = "GAME OVER";
-            document.body.appendChild(go);
+            stage.appendChild(go);
 
             // 최소 1.8초 보여주고, 날아가던 공격 연출이 끝나면(쿨타임 해제) 초기화
             const t0 = performance.now();
@@ -1446,6 +1459,10 @@ body {
             marquee_paused = false; 
             started = false;
             spot_reset();
+            let text = document.getElementById("text");
+            text.style.zIndex = 1000;
+            let member_key = document.getElementById("member_key");
+            member_key.style.zIndex = 10000;
             start_btn.disabled = false;
             start_btn.textContent = "START";
             stat_render();                          // 스탯 버튼 다시 활성화
